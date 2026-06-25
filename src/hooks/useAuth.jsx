@@ -34,24 +34,52 @@ export function AuthProvider({ children }) {
     setLoading(false)
   }
 
-  async function signIn(email, password) {
+  // Sign in with username — converts to internal email behind the scenes
+  async function signIn(username, password) {
+    const email = username.toLowerCase().includes('@')
+      ? username  // allow email login for existing admin accounts
+      : `${username.toLowerCase()}@sellpoint.internal`
+
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) {
+      // Give a friendly message instead of Supabase's technical one
+      if (error.message.includes('Invalid login')) {
+        throw new Error('Incorrect username or password')
+      }
+      throw error
+    }
+    return data
+  }
+
+  // Admin creates a new staff account
+  async function createStaffAccount({ username, password, fullName, role }) {
+    const { data, error } = await supabase.rpc('create_staff_account', {
+      p_username: username.toLowerCase(),
+      p_password: password,
+      p_full_name: fullName,
+      p_role: role,
+      p_created_by: user?.id,
+    })
     if (error) throw error
     return data
   }
 
-  async function signUp(email, password, name, role = 'cashier') {
-    const { data, error } = await supabase.auth.signUp({ email, password })
+  // Admin updates a staff member's profile
+  async function updateStaffProfile(userId, updates) {
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', userId)
     if (error) throw error
-    if (data.user) {
-      await supabase.from('profiles').insert({
-        id: data.user.id,
-        full_name: name,
-        role,
-        email,
-      })
-    }
-    return data
+  }
+
+  // Admin suspends or activates a staff account
+  async function setStaffStatus(userId, status) {
+    const { error } = await supabase
+      .from('profiles')
+      .update({ status })
+      .eq('id', userId)
+    if (error) throw error
   }
 
   async function signOut() {
@@ -59,7 +87,11 @@ export function AuthProvider({ children }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, profile, loading, signIn, signUp, signOut }}>
+    <AuthContext.Provider value={{
+      user, profile, loading,
+      signIn, signOut,
+      createStaffAccount, updateStaffProfile, setStaffStatus,
+    }}>
       {children}
     </AuthContext.Provider>
   )

@@ -8,7 +8,7 @@ export default function AuthPage() {
   const [mode, setMode] = useState('login')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
-  const [form, setForm] = useState({ name: '', email: '', password: '', role: 'cashier' })
+  const [form, setForm] = useState({ name: '', username: '', password: '' })
 
   function set(field) { return (e) => setForm(f => ({ ...f, [field]: e.target.value })) }
 
@@ -17,13 +17,8 @@ export default function AuthPage() {
     setLoading(true)
     try {
       if (mode === 'login') {
-        await signIn(form.email, form.password)
+        await signIn(form.username, form.password)
         toast.success('Welcome back!')
-      } else {
-        if (!form.name.trim()) throw new Error('Name is required')
-        await signUp(form.email, form.password, form.name, form.role)
-        toast.success('Account created!')
-        setMode('login')
       }
     } catch (err) {
       toast.error(err.message || 'Something went wrong')
@@ -105,19 +100,14 @@ export default function AuthPage() {
           padding: '32px', boxShadow: 'var(--shadow-lg)',
         }}>
           <h2 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px', color: 'var(--color-text)' }}>
-            {mode === 'login' ? 'Sign in' : 'Create account'}
+            Sign in to SellPoint
           </h2>
           <p style={{ fontSize: '13px', color: 'var(--color-muted)', marginBottom: '24px' }}>
-            {mode === 'login' ? 'Enter your credentials to continue' : 'Fill in details to get started'}
+            Enter your username and password to continue
           </p>
 
           <form onSubmit={handleSubmit}>
-            {mode === 'register' && (
-              <div className="form-group">
-                <label>Full Name</label>
-                <input value={form.name} onChange={set('name')} placeholder="e.g. Jane Wanjiku" required />
-              </div>
-            )}
+
             <div className="form-group">
               <label>Email Address</label>
               <input type="email" value={form.email} onChange={set('email')} placeholder="you@example.com" required />
@@ -137,28 +127,16 @@ export default function AuthPage() {
                 {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
               </button>
             </div>
-            {mode === 'register' && (
-              <div className="form-group">
-                <label>Role</label>
-                <select value={form.role} onChange={set('role')}>
-                  <option value="cashier">Cashier</option>
-                  <option value="admin">Admin / Manager</option>
-                </select>
-              </div>
-            )}
+
             <button type="submit" className="btn-primary" disabled={loading}
               style={{ width: '100%', justifyContent: 'center', marginTop: '8px', padding: '12px', fontSize: '15px', borderRadius: '10px' }}>
               {loading && <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />}
-              {loading ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
+              {loading ? 'Please wait...' : 'Sign In'}
             </button>
           </form>
 
-          <p style={{ fontSize: '13px', color: 'var(--color-muted)', textAlign: 'center', marginTop: '20px' }}>
-            {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-            <button onClick={() => setMode(mode === 'login' ? 'register' : 'login')}
-              style={{ background: 'none', border: 'none', color: 'var(--color-primary)', cursor: 'pointer', fontSize: '13px', fontWeight: '700' }}>
-              {mode === 'login' ? 'Register' : 'Sign In'}
-            </button>
+          <p style={{ fontSize: '12px', color: 'var(--color-muted)', textAlign: 'center', marginTop: '16px' }}>
+            Contact your admin if you need access
           </p>
         </div>
       </div>

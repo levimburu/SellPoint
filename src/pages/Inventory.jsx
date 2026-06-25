@@ -7,7 +7,7 @@ const CATEGORIES = ['General', 'Electronics', 'Clothing', 'Food & Beverages', 'S
 
 const emptyForm = { name: '', sku: '', category: 'General', price: '', cost_price: '', stock_qty: '', low_stock_alert: 5, unit: 'pcs', description: '' }
 
-export default function Inventory() {
+export default function Inventory({ readOnly = false }) {
   const [products, setProducts] = useState([])
   const [filtered, setFiltered] = useState([])
   const [search, setSearch] = useState('')
@@ -110,9 +110,11 @@ export default function Inventory() {
           <h1 className="page-title">Inventory</h1>
           <p className="page-subtitle">{products.length} products · {products.filter(p => p.stock_qty <= p.low_stock_alert).length} low stock</p>
         </div>
-        <button className="btn-primary" onClick={openAdd}>
-          <Plus size={16} /> Add Product
-        </button>
+        {!readOnly && (
+          <button className="btn-primary" onClick={openAdd}>
+            <Plus size={16} /> Add Product
+          </button>
+        )}
       </div>
 
       {/* Filters */}
@@ -170,14 +172,16 @@ export default function Inventory() {
                           : <span className="badge-green">In Stock</span>}
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '8px' }}>
-                        <button onClick={() => openEdit(product)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)', padding: '4px' }}>
-                          <Edit2 size={15} />
-                        </button>
-                        <button onClick={() => handleDelete(product)} disabled={deletingId === product.id} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: '4px' }}>
-                          {deletingId === product.id ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <Trash2 size={15} />}
-                        </button>
-                      </div>
+                      {!readOnly && (
+                        <div style={{ display: 'flex', gap: '8px' }}>
+                          <button onClick={() => openEdit(product)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)', padding: '4px' }}>
+                            <Edit2 size={15} />
+                          </button>
+                          <button onClick={() => handleDelete(product)} disabled={deletingId === product.id} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-danger)', padding: '4px' }}>
+                            {deletingId === product.id ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} /> : <Trash2 size={15} />}
+                          </button>
+                        </div>
+                      )}
                     </td>
                   </tr>
                 )

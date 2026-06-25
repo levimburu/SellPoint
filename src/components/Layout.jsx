@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
-const navItems = [
+const adminNavItems = [
   { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { id: 'checkout', label: 'Checkout', icon: ShoppingCart },
   { id: 'inventory', label: 'Inventory', icon: Package },
@@ -17,9 +17,17 @@ const navItems = [
   { id: 'reports', label: 'Reports', icon: BarChart3 },
 ]
 
-export default function Layout({ currentPage, onNavigate, children }) {
+const cashierNavItems = [
+  { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { id: 'checkout', label: 'Checkout', icon: ShoppingCart },
+  { id: 'inventory', label: 'Inventory', icon: Package },
+  { id: 'customers', label: 'Customers', icon: Users },
+  { id: 'tabs', label: 'Customer Tabs', icon: CreditCard },
+  { id: 'sales', label: 'Sales History', icon: FileText },
+]
+
+export default function Layout({ currentPage, onNavigate, children, isAdmin = false }) {
   const { profile, signOut } = useAuth()
-  const isAdmin = profile?.role === 'admin'
   const [sidebarOpen, setSidebarOpen] = useState(true)
 
   async function handleSignOut() {
@@ -83,7 +91,7 @@ export default function Layout({ currentPage, onNavigate, children }) {
 
         {/* Nav items */}
         <nav style={{ flex: 1, padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: '2px', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
-          {navItems.map(({ id, label, icon: Icon }) => {
+          {(isAdmin ? adminNavItems : cashierNavItems).map(({ id, label, icon: Icon }) => {
             const active = currentPage === id
             return (
               <button
@@ -178,6 +186,25 @@ export default function Layout({ currentPage, onNavigate, children }) {
             </div>
           )}
 
+          {isAdmin && sidebarOpen && (
+            <button
+              onClick={() => onNavigate('staff')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '10px',
+                padding: '9px 12px', borderRadius: '8px',
+                fontSize: '13.5px', fontWeight: currentPage === 'staff' ? '600' : '500',
+                color: currentPage === 'staff' ? '#ffffff' : 'rgba(255,255,255,0.75)',
+                background: currentPage === 'staff' ? 'rgba(125,218,88,0.18)' : 'transparent',
+                cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left',
+                marginBottom: '2px',
+              }}
+              onMouseEnter={e => { if (currentPage !== 'staff') e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
+              onMouseLeave={e => { if (currentPage !== 'staff') e.currentTarget.style.background = 'transparent' }}
+            >
+              <Users size={17} style={{ flexShrink: 0 }} />
+              <span style={{ whiteSpace: 'nowrap' }}>Staff</span>
+            </button>
+          )}
           {isAdmin && sidebarOpen && (
             <button
               onClick={() => onNavigate('settings')}
