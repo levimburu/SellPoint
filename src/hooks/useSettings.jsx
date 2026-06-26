@@ -4,11 +4,11 @@ import { supabase } from '../lib/supabase'
 const SettingsContext = createContext(null)
 
 export const defaultSettings = {
-  store_name: "Kagai's Agro",
-  tagline: 'Your Trusted Agrovet Partner',
-  address: 'Kitale, Trans-Nzoia County',
-  phone: '+254 723 482 184',
-  email: 'info@kagaisagro.co.ke',
+  store_name: "Hedge Stores",
+  tagline: 'For your packaging solutions',
+  address: 'Trans-Nzoia, Kitale',
+  phone: '+254 728 885 088',
+  email: 'info@hedgestores.co.ke',
   kra_pin: 'A000000000Z',
   receipt_footer: 'Thank you for your business!',
   currency: 'KES',

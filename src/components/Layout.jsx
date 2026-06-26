@@ -87,7 +87,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
                 SellPoint
               </div>
               <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.6)', whiteSpace: 'nowrap', fontWeight: '500' }}>
-                Kagai's Agro
+                Hedge Stores
               </div>
             </div>
           )}

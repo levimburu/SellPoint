@@ -41,17 +41,17 @@ export default function Settings() {
       title: 'Store Information',
       icon: Store,
       fields: [
-        { key: 'store_name', label: 'Store / Business Name', placeholder: "e.g. Kagai's Agro", required: true },
-        { key: 'tagline', label: 'Tagline / Slogan', placeholder: 'e.g. Your Trusted Agrovet Partner' },
+        { key: 'store_name', label: 'Store / Business Name', placeholder: "e.g. 'Hedge Stores'", required: true },
+        { key: 'tagline', label: 'Tagline / Slogan', placeholder: 'e.g. For your packaging solutions' },
       ]
     },
     {
       title: 'Contact Details',
       icon: Phone,
       fields: [
-        { key: 'phone', label: 'Phone Number', placeholder: 'e.g. +254 723 482 184' },
-        { key: 'email', label: 'Email Address', placeholder: 'e.g. info@kagaisagro.co.ke' },
-        { key: 'address', label: 'Physical Address', placeholder: 'e.g. Kitale, Trans-Nzoia County' },
+        { key: 'phone', label: 'Phone Number', placeholder: 'e.g. +254 728 885 088' },
+        { key: 'email', label: 'Email Address', placeholder: 'e.g. info@hedgestores.co.ke' },
+        { key: 'address', label: 'Physical Address', placeholder: 'e.g. Trans-Nzoia, Kitale' },
       ]
     },
     {
