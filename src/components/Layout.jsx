@@ -45,7 +45,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
       {/* Sidebar — dark green, white text */}
       <aside style={{
         width: sidebarOpen ? '224px' : '64px',
-        background: '#1a3a0f',
+        background: 'var(--color-sidebar)',
         display: 'flex',
         flexDirection: 'column',
         transition: 'width 0.2s ease',
@@ -65,7 +65,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
         {/* Logo */}
         <div style={{
           padding: '0 14px',
-          borderBottom: '1px solid rgba(255,255,255,0.12)',
+          borderBottom: '1px solid rgba(255,255,255,0.06)',
           display: 'flex',
           alignItems: 'center',
           gap: '10px',
@@ -76,7 +76,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
         }}>
           <div style={{
             width: '34px', height: '34px', borderRadius: '9px', flexShrink: 0,
-            background: '#2d7a1f',
+            background: 'var(--color-primary)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
           }}>
             <ShoppingBag size={17} color="#ffffff" />
@@ -107,8 +107,8 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
                   borderRadius: '8px',
                   fontSize: '13px',
                   fontWeight: active ? '600' : '500',
-                  color: active ? '#ffffff' : 'rgba(255,255,255,0.75)',
-                  background: active ? 'rgba(125,218,88,0.18)' : 'transparent',
+                  color: active ? '#FB923C' : 'rgba(255,255,255,0.55)',
+                  background: active ? 'rgba(249,115,22,0.15)' : 'transparent',
                   cursor: 'pointer',
                   border: 'none',
                   width: '100%',
@@ -116,8 +116,8 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
                   justifyContent: sidebarOpen ? 'flex-start' : 'center',
                   transition: 'background 0.15s, color 0.15s',
                 }}
-                onMouseEnter={e => { if (!active) e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
-                onMouseLeave={e => { if (!active) e.currentTarget.style.background = 'transparent' }}
+                onMouseEnter={e => { if (!active) { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = 'rgba(255,255,255,0.85)' } }}
+                onMouseLeave={e => { if (!active) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = 'rgba(255,255,255,0.55)' } }}
                 title={!sidebarOpen ? label : undefined}
               >
                 <Icon size={17} style={{ flexShrink: 0 }} />
@@ -129,13 +129,14 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
 
 
         {/* Settings + User + Sign out */}
-        <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.12)', position: 'relative', zIndex: 1 }}>
+        <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', zIndex: 1 }}>
           {sidebarOpen && profile && (
             <div style={{
               display: 'flex', alignItems: 'center', gap: '8px',
               padding: '8px 10px', marginBottom: '6px',
-              background: 'rgba(255,255,255,0.08)',
-              borderRadius: '8px',
+              background: 'rgba(255,255,255,0.05)',
+              borderRadius: '9px',
+              border: '0.5px solid rgba(255,255,255,0.08)',
             }}>
               <div style={{
                 width: '26px', height: '26px', borderRadius: '50%', flexShrink: 0,
@@ -172,7 +173,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
               cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left',
               justifyContent: sidebarOpen ? 'flex-start' : 'center',
             }}
-            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.18)'}
+            onMouseEnter={e => e.currentTarget.style.background = 'rgba(239,68,68,0.12)'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
             title={!sidebarOpen ? 'Sign Out' : undefined}
           >
@@ -191,20 +192,20 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
           top: '22px',
           width: '22px', height: '22px',
           borderRadius: '50%',
-          background: 'var(--color-surface)',
-          border: '1.5px solid var(--color-border)',
+          background: 'var(--color-sidebar)',
+          border: '1px solid rgba(255,255,255,0.1)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           cursor: 'pointer', zIndex: 10,
           transition: 'left 0.2s ease',
-          color: 'var(--color-muted)',
-          boxShadow: 'var(--shadow-sm)',
+          color: 'rgba(255,255,255,0.4)',
+          boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
         }}
       >
         <ChevronRight size={11} style={{ transform: sidebarOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} />
       </button>
 
       {/* Main content */}
-      <main style={{ flex: 1, overflow: 'auto', padding: '16px 20px', height: '100vh' }}>
+      <main style={{ flex: 1, overflow: 'auto', padding: '20px 24px', height: '100vh', background: 'var(--color-bg)' }}>
         {children}
       </main>
 
