@@ -125,39 +125,6 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
           })}
         </nav>
 
-        {/* Animated farm scene at bottom of sidebar */}
-        {sidebarOpen && (
-          <div style={{ position: 'relative', height: '100px', overflow: 'hidden', borderTop: '1px solid rgba(255,255,255,0.12)', flexShrink: 0 }}>
-            <svg width="224" height="100" viewBox="0 0 220 100" style={{ position: 'absolute', bottom: 0, left: 0 }}>
-              <path d="M0 72 Q30 62 60 70 Q90 57 110 67 Q140 60 165 68 Q195 62 220 70 L220 100 L0 100 Z" fill="rgba(255,255,255,0.05)" />
-              <path d="M0 82 Q40 77 80 82 Q120 76 160 82 Q190 78 220 82 L220 100 L0 100 Z" fill="rgba(255,255,255,0.08)" />
-
-              {/* Walking cow */}
-              <g style={{ animation: 'cowWalk 9s linear infinite' }}>
-                <ellipse cx="20" cy="55" rx="13" ry="8" fill="rgba(255,255,255,0.55)" />
-                <ellipse cx="32" cy="53" rx="6" ry="5" fill="rgba(255,255,255,0.55)" />
-                <rect x="10" y="61" width="3" height="6" rx="1" fill="rgba(255,255,255,0.55)" />
-                <rect x="16" y="62" width="3" height="5" rx="1" fill="rgba(255,255,255,0.55)" />
-                <rect x="24" y="62" width="3" height="5" rx="1" fill="rgba(255,255,255,0.55)" />
-                <rect x="29" y="61" width="3" height="6" rx="1" fill="rgba(255,255,255,0.55)" />
-              </g>
-
-              {/* Wheat stalks */}
-              <g transform="translate(170,35)">
-                <line x1="0" y1="40" x2="0" y2="5" stroke="rgba(255,255,255,0.4)" strokeWidth="1.2" />
-                <ellipse cx="0" cy="5" rx="3" ry="5" fill="rgba(255,255,255,0.4)" />
-                <ellipse cx="-6" cy="14" rx="3" ry="4.5" fill="rgba(255,255,255,0.4)" transform="rotate(-30 -6 14)" />
-                <ellipse cx="6" cy="14" rx="3" ry="4.5" fill="rgba(255,255,255,0.4)" transform="rotate(30 6 14)" />
-              </g>
-              <g transform="translate(190,40)">
-                <line x1="0" y1="35" x2="0" y2="8" stroke="rgba(255,255,255,0.4)" strokeWidth="1.2" />
-                <ellipse cx="0" cy="8" rx="2.5" ry="4" fill="rgba(255,255,255,0.4)" />
-                <ellipse cx="-5" cy="16" rx="2.5" ry="3.5" fill="rgba(255,255,255,0.4)" transform="rotate(-30 -5 16)" />
-                <ellipse cx="5" cy="16" rx="2.5" ry="3.5" fill="rgba(255,255,255,0.4)" transform="rotate(30 5 16)" />
-              </g>
-            </svg>
-          </div>
-        )}
 
         {/* Settings + User + Sign out */}
         <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.12)', position: 'relative', zIndex: 1 }}>
@@ -239,15 +206,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
         {children}
       </main>
 
-      <style>{`
-        @keyframes cowWalk {
-          0% { transform: translateX(0px); }
-          45% { transform: translateX(150px); }
-          50% { transform: translateX(150px) scaleX(-1) translateX(-300px); }
-          95% { transform: translateX(0px) scaleX(-1) translateX(-300px); }
-          100% { transform: translateX(0px); }
-        }
-      `}</style>
+
     </div>
   )
 }
