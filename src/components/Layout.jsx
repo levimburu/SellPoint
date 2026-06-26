@@ -92,7 +92,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
         </div>
 
         {/* Nav items */}
-        <nav style={{ flex: 1, padding: '10px 8px', display: 'flex', flexDirection: 'column', gap: '2px', overflowY: 'auto', position: 'relative', zIndex: 1 }}>
+        <nav style={{ flex: 1, padding: '6px 8px', display: 'flex', flexDirection: 'column', gap: '1px', overflowY: 'hidden', position: 'relative', zIndex: 1 }}>
           {(isAdmin ? adminNavItems : cashierNavItems).map(({ id, label, icon: Icon }) => {
             const active = currentPage === id
             return (
@@ -101,9 +101,9 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
                 onClick={() => onNavigate(id)}
                 style={{
                   display: 'flex', alignItems: 'center', gap: '10px',
-                  padding: sidebarOpen ? '9px 12px' : '9px',
+                  padding: sidebarOpen ? '7px 12px' : '7px',
                   borderRadius: '8px',
-                  fontSize: '13.5px',
+                  fontSize: '13px',
                   fontWeight: active ? '600' : '500',
                   color: active ? '#ffffff' : 'rgba(255,255,255,0.75)',
                   background: active ? 'rgba(125,218,88,0.18)' : 'transparent',
@@ -162,9 +162,9 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
             onClick={handleSignOut}
             style={{
               display: 'flex', alignItems: 'center', gap: '10px',
-              padding: sidebarOpen ? '9px 12px' : '9px',
+              padding: sidebarOpen ? '7px 12px' : '7px',
               borderRadius: '8px',
-              fontSize: '13.5px', fontWeight: '500',
+              fontSize: '13px', fontWeight: '500',
               color: 'rgba(255,255,255,0.75)',
               background: 'transparent',
               cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left',
