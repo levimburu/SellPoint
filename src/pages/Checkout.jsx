@@ -324,7 +324,7 @@ export default function Checkout() {
   const now = new Date()
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '14px', height: 'calc(100vh - 60px)', overflow: 'hidden' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '14px', height: 'calc(100vh - 56px)', overflow: 'hidden' }}>
 
       {/* LEFT: Products */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'hidden', height: '100%' }}>
@@ -452,7 +452,7 @@ export default function Checkout() {
         </div>
 
         {/* ── CASHIER CONTROLS (bottom, white, cashier-facing) ── */}
-        <div style={{ flex: 1, background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <div style={{ flex: 1, background: '#fff', display: 'flex', flexDirection: 'column', overflow: 'hidden', minHeight: 0 }}>
 
           {/* Cart header */}
           <div style={{ padding: '10px 14px', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', flexShrink: 0 }}>
