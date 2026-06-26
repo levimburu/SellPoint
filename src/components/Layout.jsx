@@ -15,6 +15,8 @@ const adminNavItems = [
   { id: 'analysis', label: 'Sales Analysis', icon: TrendingUp },
   { id: 'sales', label: 'Sales History', icon: FileText },
   { id: 'reports', label: 'Reports', icon: BarChart3 },
+  { id: 'staff', label: 'Staff', icon: Users },
+  { id: 'settings', label: 'Settings', icon: Settings },
 ]
 
 const cashierNavItems = [
@@ -186,44 +188,8 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
             </div>
           )}
 
-          {isAdmin && sidebarOpen && (
-            <button
-              onClick={() => onNavigate('staff')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
-                padding: '9px 12px', borderRadius: '8px',
-                fontSize: '13.5px', fontWeight: currentPage === 'staff' ? '600' : '500',
-                color: currentPage === 'staff' ? '#ffffff' : 'rgba(255,255,255,0.75)',
-                background: currentPage === 'staff' ? 'rgba(125,218,88,0.18)' : 'transparent',
-                cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left',
-                marginBottom: '2px',
-              }}
-              onMouseEnter={e => { if (currentPage !== 'staff') e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
-              onMouseLeave={e => { if (currentPage !== 'staff') e.currentTarget.style.background = 'transparent' }}
-            >
-              <Users size={17} style={{ flexShrink: 0 }} />
-              <span style={{ whiteSpace: 'nowrap' }}>Staff</span>
-            </button>
-          )}
-          {isAdmin && sidebarOpen && (
-            <button
-              onClick={() => onNavigate('settings')}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '10px',
-                padding: '9px 12px', borderRadius: '8px',
-                fontSize: '13.5px', fontWeight: currentPage === 'settings' ? '600' : '500',
-                color: currentPage === 'settings' ? '#ffffff' : 'rgba(255,255,255,0.75)',
-                background: currentPage === 'settings' ? 'rgba(125,218,88,0.18)' : 'transparent',
-                cursor: 'pointer', border: 'none', width: '100%', textAlign: 'left',
-                marginBottom: '2px',
-              }}
-              onMouseEnter={e => { if (currentPage !== 'settings') e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
-              onMouseLeave={e => { if (currentPage !== 'settings') e.currentTarget.style.background = 'transparent' }}
-            >
-              <Settings size={17} style={{ flexShrink: 0 }} />
-              <span style={{ whiteSpace: 'nowrap' }}>Settings</span>
-            </button>
-          )}
+
+
 
           <button
             onClick={handleSignOut}
