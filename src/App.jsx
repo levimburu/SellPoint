@@ -14,6 +14,8 @@ import Tabs from './pages/Tabs'
 import Settings from './pages/Settings'
 import SalesAnalysis from './pages/SalesAnalysis'
 import Staff from './pages/Staff'
+import Suppliers from './pages/Suppliers'
+import Purchases from './pages/Purchases'
 import { SettingsProvider } from './hooks/useSettings'
 import './index.css'
 
@@ -59,6 +61,8 @@ function AppContent() {
     reports: <Reports />,
     settings: <Settings />,
     staff: <Staff />,
+    suppliers: <Suppliers />,
+    purchases: <Purchases />,
   }
 
   // Cashier pages — restricted access

@@ -5,7 +5,7 @@ import toast from 'react-hot-toast'
 
 const CATEGORIES = ['General', 'Electronics', 'Clothing', 'Food & Beverages', 'Stationery', 'Household', 'Cosmetics', 'Pharmacy', 'Other']
 
-const emptyForm = { name: '', sku: '', category: 'General', price: '', cost_price: '', stock_qty: '', low_stock_alert: 5, unit: 'pcs', description: '' }
+const emptyForm = { name: '', sku: '', category: 'General', price: '', cost_price: '', stock_qty: '', low_stock_alert: 5, unit: 'pcs', description: '', supplier_id: '' }
 
 export default function Inventory({ readOnly = false }) {
   const [products, setProducts] = useState([])
@@ -18,8 +18,9 @@ export default function Inventory({ readOnly = false }) {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
+  const [suppliers, setSuppliers] = useState([])
 
-  useEffect(() => { loadProducts() }, [])
+  useEffect(() => { loadProducts(); loadSuppliers() }, [])
 
   useEffect(() => {
     let list = products
@@ -27,6 +28,11 @@ export default function Inventory({ readOnly = false }) {
     if (categoryFilter !== 'All') list = list.filter(p => p.category === categoryFilter)
     setFiltered(list)
   }, [products, search, categoryFilter])
+
+  async function loadSuppliers() {
+    const { data } = await supabase.from('suppliers').select('id, name').eq('is_active', true).order('name')
+    setSuppliers(data || [])
+  }
 
   async function loadProducts() {
     setLoading(true)
@@ -47,7 +53,7 @@ export default function Inventory({ readOnly = false }) {
     setForm({
       name: product.name, sku: product.sku || '', category: product.category || 'General',
       price: product.price, cost_price: product.cost_price || '', stock_qty: product.stock_qty,
-      low_stock_alert: product.low_stock_alert || 5, unit: product.unit || 'pcs', description: product.description || ''
+      low_stock_alert: product.low_stock_alert || 5, unit: product.unit || 'pcs', description: product.description || '', supplier_id: product.supplier_id || ''
     })
     setShowModal(true)
   }
@@ -74,6 +80,7 @@ export default function Inventory({ readOnly = false }) {
       low_stock_alert: parseInt(form.low_stock_alert) || 5,
       unit: form.unit,
       description: form.description || null,
+      supplier_id: form.supplier_id || null,
       is_active: true,
     }
 
@@ -250,6 +257,13 @@ export default function Inventory({ readOnly = false }) {
                 <input type="number" min="0" value={form.low_stock_alert} onChange={set('low_stock_alert')} />
               </div>
 
+              <div className="form-group">
+                <label>Supplier</label>
+                <select value={form.supplier_id} onChange={set('supplier_id')}>
+                  <option value="">No supplier assigned</option>
+                  {suppliers.map(s => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+              </div>
               <div className="form-group">
                 <label>Description (optional)</label>
                 <textarea value={form.description} onChange={set('description')} placeholder="Brief description..." rows={2} style={{ resize: 'vertical' }} />

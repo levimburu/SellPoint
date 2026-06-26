@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../hooks/useAuth'
 import {
   LayoutDashboard, ShoppingCart, Package, Users,
-  BarChart3, ShoppingBag, LogOut, ChevronRight, FileText, CreditCard, Settings, TrendingUp
+  BarChart3, ShoppingBag, LogOut, ChevronRight, FileText, CreditCard, Settings, TrendingUp, Truck
 } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -15,6 +15,8 @@ const adminNavItems = [
   { id: 'analysis', label: 'Sales Analysis', icon: TrendingUp },
   { id: 'sales', label: 'Sales History', icon: FileText },
   { id: 'reports', label: 'Reports', icon: BarChart3 },
+  { id: 'suppliers', label: 'Suppliers', icon: Truck },
+  { id: 'purchases', label: 'Stock Purchases', icon: Package },
   { id: 'staff', label: 'Staff', icon: Users },
   { id: 'settings', label: 'Settings', icon: Settings },
 ]
