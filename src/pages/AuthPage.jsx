@@ -109,8 +109,8 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit}>
 
             <div className="form-group">
-              <label>Email Address</label>
-              <input type="email" value={form.email} onChange={set('email')} placeholder="you@example.com" required />
+              <label>Username</label>
+              <input value={form.username} onChange={set('username')} placeholder="Enter your username" required autoComplete="username" />
             </div>
             <div className="form-group" style={{ position: 'relative' }}>
               <label>Password</label>
