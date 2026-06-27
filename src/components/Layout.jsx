@@ -4,6 +4,7 @@ import {
   LayoutDashboard, ShoppingCart, Package, Users,
   BarChart3, ShoppingBag, LogOut, ChevronRight, FileText, CreditCard, Settings, TrendingUp, Truck
 } from 'lucide-react'
+import { LogoIcon } from '../assets/Logo'
 import toast from 'react-hot-toast'
 
 const adminNavItems = [

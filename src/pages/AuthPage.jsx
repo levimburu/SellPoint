@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { LogoStacked } from '../assets/Logo'
 import { useAuth } from '../hooks/useAuth'
 import { ShoppingBag, Eye, EyeOff, Loader2 } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -85,11 +86,11 @@ export default function AuthPage() {
           }}>
             <ShoppingBag size={28} color="#ffffff" />
           </div>
-          <h1 style={{ fontSize: '26px', fontWeight: '900', color: 'var(--color-text)', letterSpacing: '-0.5px' }}>
-            SellPoint
-          </h1>
+          <div style={{ display: 'flex', justifyContent: 'center', margin: '8px 0' }}>
+            <LogoStacked />
+          </div>
           <p style={{ fontSize: '14px', color: 'var(--color-muted)', marginTop: '4px', fontWeight: '500' }}>
-            Kagai's Agro · Kitale
+            Your store's POS system
           </p>
         </div>
 
