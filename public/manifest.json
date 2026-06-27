@@ -1,0 +1,18 @@
+{
+  "name": "SellPoint POS",
+  "short_name": "SellPoint",
+  "description": "Modern Point of Sale System for Kenyan Businesses",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A1628",
+  "theme_color": "#0A1628",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
