@@ -2,7 +2,7 @@
   "name": "sellpoint-pos",
   "private": true,
   "version": "1.0.0",
-  "description": "SellPoint — Point of Sale system for Kagai's Agro",
+  "description": "SellPoint \u2014 Point of Sale system for Kagai's Agro",
   "author": "Levi Mburu",
   "type": "module",
   "main": "electron/main.cjs",
@@ -75,5 +75,8 @@
       "createStartMenuShortcut": true,
       "shortcutName": "SellPoint"
     }
+  },
+  "overrides": {
+    "lightningcss": "1.32.0"
   }
 }
