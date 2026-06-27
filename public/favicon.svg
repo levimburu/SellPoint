@@ -1,18 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <!-- Background -->
   <rect width="512" height="512" rx="115" fill="#0A1628"/>
-  <!-- Bag body -->
-  <path d="M147 217 Q147 192 172 192 L172 179 Q172 141 198 141 L314 141 Q340 141 340 179 L340 192 Q365 192 365 217 L378 358 Q378 384 352 384 L160 384 Q134 384 134 358 Z" fill="url(#grad)"/>
-  <!-- Handle highlight -->
+  <path d="M147 217 Q147 192 172 192 L172 179 Q172 141 198 141 L314 141 Q340 141 340 179 L340 192 Q365 192 365 217 L378 358 Q378 384 352 384 L160 384 Q134 384 134 358 Z" fill="#F97316"/>
   <path d="M172 192 Q172 141 198 141 L314 141 Q340 141 340 192" fill="none" stroke="#FED7AA" stroke-width="12" stroke-linecap="round" opacity="0.5"/>
-  <!-- Checkmark -->
   <path d="M192 275 L232 320 L320 230" fill="none" stroke="white" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
-  <!-- Shine -->
-  <ellipse cx="218" cy="228" rx="26" ry="13" fill="white" opacity="0.12" transform="rotate(-20 218 228)"/>
-  <defs>
-    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#FB923C"/>
-      <stop offset="100%" stop-color="#EA580C"/>
-    </linearGradient>
-  </defs>
 </svg>
