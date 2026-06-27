@@ -324,7 +324,7 @@ export default function Checkout() {
   const now = new Date()
 
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '14px', height: 'calc(100vh - 112px)', overflow: 'hidden' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 340px', gap: '14px', height: '100%', display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0, overflow: 'hidden' }}>
 
       {/* LEFT: Products */}
       <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', overflow: 'hidden', height: '100%' }}>
