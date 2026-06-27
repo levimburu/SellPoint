@@ -205,7 +205,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
       </button>
 
       {/* Main content */}
-      <main style={{ flex: 1, overflow: 'hidden', padding: '16px 20px', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', minHeight: 0, height: '100vh' }}>
+      <main style={{ flex: 1, overflow: 'hidden', padding: '16px 20px', background: 'var(--color-bg)', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
         {children}
       </main>
 
