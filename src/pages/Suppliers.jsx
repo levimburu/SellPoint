@@ -5,7 +5,7 @@ import { Plus, Edit2, Trash2, X, Loader2, Truck, Phone, Mail, MapPin, User, Shie
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 
-const emptyForm = { name: '', location: '', phone: '', email: '', contact_person: '', notes: '' }
+const emptyForm = { name: '', location: '', phone: '', email: '', contact_person: '', notes: '', selectedProducts: [] }
 
 export default function Suppliers() {
   const { profile } = useAuth()
@@ -16,8 +16,10 @@ export default function Suppliers() {
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [deletingId, setDeletingId] = useState(null)
+  const [products, setProducts] = useState([])
+  const [supplierProducts, setSupplierProducts] = useState({})
 
-  useEffect(() => { loadSuppliers() }, [])
+  useEffect(() => { loadSuppliers(); loadProducts() }, [])
 
   if (profile?.role !== 'admin') {
     return (
@@ -27,6 +29,21 @@ export default function Suppliers() {
         <p style={{ color: 'var(--color-muted)', fontSize: '14px' }}>Only administrators can manage suppliers.</p>
       </div>
     )
+  }
+
+  async function loadProducts() {
+    const { data } = await supabase.from('products').select('id, name, supplier_id').eq('is_active', true).order('name')
+    const prods = data || []
+    setProducts(prods)
+    // Group by supplier
+    const grouped = {}
+    prods.forEach(p => {
+      if (p.supplier_id) {
+        if (!grouped[p.supplier_id]) grouped[p.supplier_id] = []
+        grouped[p.supplier_id].push(p)
+      }
+    })
+    setSupplierProducts(grouped)
   }
 
   async function loadSuppliers() {
@@ -55,6 +72,7 @@ export default function Suppliers() {
       email: supplier.email || '',
       contact_person: supplier.contact_person || '',
       notes: supplier.notes || '',
+      selectedProducts: (supplierProducts[supplier.id] || []).map(p => p.id),
     })
     setShowModal(true)
   }
@@ -76,16 +94,32 @@ export default function Suppliers() {
       notes: form.notes.trim() || null,
       is_active: true,
     }
+    let supplierId
     let error
     if (editSupplier) {
       ;({ error } = await supabase.from('suppliers').update(payload).eq('id', editSupplier.id))
+      supplierId = editSupplier.id
     } else {
-      ;({ error } = await supabase.from('suppliers').insert(payload))
+      const { data: newSupplier, error: insertError } = await supabase.from('suppliers').insert(payload).select().single()
+      error = insertError
+      supplierId = newSupplier?.id
     }
     if (error) { toast.error(error.message); setSaving(false); return }
+
+    // Update product supplier links
+    if (supplierId) {
+      // Remove this supplier from all products first
+      await supabase.from('products').update({ supplier_id: null }).eq('supplier_id', supplierId)
+      // Then assign selected products to this supplier
+      if (form.selectedProducts.length > 0) {
+        await supabase.from('products').update({ supplier_id: supplierId }).in('id', form.selectedProducts)
+      }
+    }
+
     toast.success(editSupplier ? 'Supplier updated' : 'Supplier added')
     setShowModal(false)
     loadSuppliers()
+    loadProducts()
     setSaving(false)
   }
 
@@ -179,6 +213,18 @@ export default function Suppliers() {
                 )}
               </div>
 
+              {supplierProducts[supplier.id]?.length > 0 && (
+                <div style={{ marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--color-border)' }}>
+                  <div style={{ fontSize: '11px', fontWeight: '600', color: 'var(--color-muted)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Supplies</div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '5px' }}>
+                    {supplierProducts[supplier.id].map(p => (
+                      <span key={p.id} style={{ background: 'var(--color-primary-glow)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: '999px', padding: '2px 10px', fontSize: '11px', color: 'var(--color-primary)', fontWeight: '500' }}>
+                        {p.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
               <div style={{ fontSize: '11px', color: 'var(--color-muted)', marginTop: '10px', paddingTop: '10px', borderTop: '1px solid var(--color-border)' }}>
                 Added {format(new Date(supplier.created_at), 'dd MMM yyyy')}
               </div>
@@ -221,6 +267,41 @@ export default function Suppliers() {
                   <label>Email</label>
                   <input type="email" value={form.email} onChange={set('email')} placeholder="supplier@email.com" />
                 </div>
+              </div>
+              <div className="form-group">
+                <label>Products Supplied</label>
+                <div style={{ border: '1.5px solid var(--color-border)', borderRadius: '8px', maxHeight: '150px', overflowY: 'auto', background: 'var(--color-surface)' }}>
+                  {products.length === 0 ? (
+                    <div style={{ padding: '12px', fontSize: '13px', color: 'var(--color-muted)' }}>No products in inventory yet</div>
+                  ) : (
+                    products.map(p => (
+                      <label key={p.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderBottom: '1px solid var(--color-border)', cursor: 'pointer' }}
+                        onMouseEnter={e => e.currentTarget.style.background = 'var(--color-surface-2)'}
+                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      >
+                        <input type="checkbox"
+                          checked={form.selectedProducts.includes(p.id)}
+                          onChange={e => {
+                            const checked = e.target.checked
+                            setForm(f => ({
+                              ...f,
+                              selectedProducts: checked
+                                ? [...f.selectedProducts, p.id]
+                                : f.selectedProducts.filter(id => id !== p.id)
+                            }))
+                          }}
+                          style={{ width: '16px', height: '16px', accentColor: 'var(--color-primary)', cursor: 'pointer' }}
+                        />
+                        <span style={{ fontSize: '13px', color: 'var(--color-text)' }}>{p.name}</span>
+                      </label>
+                    ))
+                  )}
+                </div>
+                {form.selectedProducts.length > 0 && (
+                  <div style={{ fontSize: '11px', color: 'var(--color-primary)', marginTop: '4px', fontWeight: '600' }}>
+                    {form.selectedProducts.length} product{form.selectedProducts.length > 1 ? 's' : ''} selected
+                  </div>
+                )}
               </div>
               <div className="form-group">
                 <label>Notes</label>
