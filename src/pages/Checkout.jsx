@@ -373,7 +373,7 @@ export default function Checkout() {
         </div>
       </div>
 
-      {/* RIGHT: Cart panel — fixed width, full height, flex column */}
+      {/* RIGHT: Cart panel — fixed width, scrollable */}
       <div style={{
         width: '340px',
         flexShrink: 0,
@@ -381,7 +381,7 @@ export default function Checkout() {
         flexDirection: 'column',
         border: '1px solid var(--color-border)',
         borderRadius: '14px',
-        overflow: 'hidden',
+        overflowY: 'auto',
         background: '#fff',
       }}>
 
@@ -436,8 +436,8 @@ export default function Checkout() {
           </div>
         </div>
 
-        {/* CASHIER CONTROLS — takes remaining height, scrollable cart inside */}
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* CASHIER CONTROLS */}
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
 
           {/* Cart header */}
           <div style={{ padding: '8px 12px', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#F8FAFC', flexShrink: 0 }}>
@@ -489,8 +489,8 @@ export default function Checkout() {
             )}
           </div>
 
-          {/* Cart items — THIS is the scrollable area */}
-          <div style={{ flex: 1, overflowY: 'auto', overflowX: 'hidden' }}>
+          {/* Cart items */}
+          <div>
             {cart.length === 0 ? (
               <div style={{ textAlign: 'center', padding: '24px 16px', color: 'var(--color-muted)' }}>
                 <ShoppingCart size={26} style={{ marginBottom: '6px', opacity: 0.2 }} />
