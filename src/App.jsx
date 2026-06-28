@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { Toaster } from 'react-hot-toast'
 import { AuthProvider, useAuth } from './hooks/useAuth'
 import Layout from './components/Layout'
@@ -17,11 +17,22 @@ import Staff from './pages/Staff'
 import Suppliers from './pages/Suppliers'
 import Purchases from './pages/Purchases'
 import { SettingsProvider } from './hooks/useSettings'
+import { pullAll } from './lib/sync'
 import './index.css'
 
 function AppContent() {
   const { user, profile, loading } = useAuth()
   const [currentPage, setCurrentPage] = useState('dashboard')
+
+  // Mirror cloud data into the local store on login and whenever
+  // the connection comes back, so pages can read offline.
+  useEffect(() => {
+    if (!user) return
+    pullAll()
+    const onReconnect = () => pullAll()
+    window.addEventListener('online', onReconnect)
+    return () => window.removeEventListener('online', onReconnect)
+  }, [user])
 
   if (loading) {
     return (

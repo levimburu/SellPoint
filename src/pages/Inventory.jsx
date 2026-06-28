@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { localdb } from '../lib/localdb'
 import { Plus, Search, Edit2, Trash2, X, Loader2, Package } from 'lucide-react'
 import toast from 'react-hot-toast'
 
@@ -30,15 +31,39 @@ export default function Inventory({ readOnly = false }) {
   }, [products, search, categoryFilter])
 
   async function loadSuppliers() {
-    const { data } = await supabase.from('suppliers').select('id, name').eq('is_active', true).order('name')
-    setSuppliers(data || [])
+    // Local-first: show cached suppliers instantly
+    const local = (await localdb.suppliers.toArray().catch(() => []))
+      .filter(s => s.is_active !== false)
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    if (local.length) setSuppliers(local.map(s => ({ id: s.id, name: s.name })))
+
+    // If online, refresh from the cloud and update the local cache
+    if (navigator.onLine) {
+      const { data } = await supabase.from('suppliers').select('*').eq('is_active', true).order('name')
+      if (data) {
+        setSuppliers(data.map(s => ({ id: s.id, name: s.name })))
+        try { await localdb.suppliers.bulkPut(data) } catch {}
+      }
+    }
   }
 
   async function loadProducts() {
     setLoading(true)
-    const { data, error } = await supabase.from('products').select('*').eq('is_active', true).order('name')
-    if (error) { toast.error('Failed to load products'); setLoading(false); return }
-    setProducts(data || [])
+    // Local-first: show cached products immediately (works offline)
+    const local = (await localdb.products.toArray().catch(() => []))
+      .filter(p => p.is_active !== false)
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    if (local.length) { setProducts(local); setLoading(false) }
+
+    // If online, refresh from the cloud and update the local cache
+    if (navigator.onLine) {
+      const { data, error } = await supabase.from('products').select('*').eq('is_active', true).order('name')
+      if (error && local.length === 0) { toast.error('Failed to load products'); setLoading(false); return }
+      if (data) {
+        setProducts(data)
+        try { await localdb.products.bulkPut(data) } catch {}
+      }
+    }
     setLoading(false)
   }
 
