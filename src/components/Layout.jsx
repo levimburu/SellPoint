@@ -5,6 +5,8 @@ import {
   BarChart3, LogOut, ChevronRight, FileText, CreditCard, Settings, TrendingUp, Truck, Menu, X
 } from 'lucide-react'
 import { LogoIcon } from '../assets/Logo'
+import { useOnlineStatus } from '../hooks/useOnlineStatus'
+import { Wifi, WifiOff, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const adminNavItems = [
@@ -39,6 +41,27 @@ function useIsMobile() {
     return () => window.removeEventListener('resize', handler)
   }, [])
   return isMobile
+}
+
+
+// Small online/offline + pending-sync indicator
+function SyncBadge({ compact = false }) {
+  const { online, pending } = useOnlineStatus()
+  const color = online ? '#16a34a' : '#94a3b8'
+  const bg = online ? 'rgba(22,163,74,0.12)' : 'rgba(148,163,184,0.15)'
+  return (
+    <div title={online ? 'Online' : 'Offline — changes saved locally'}
+      style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: compact ? '4px 8px' : '6px 10px',
+        background: bg, borderRadius: '7px', border: `0.5px solid ${color}40` }}>
+      {online ? <Wifi size={13} color={color} /> : <WifiOff size={13} color={color} />}
+      <span style={{ fontSize: '11px', color, fontWeight: '600' }}>{online ? 'Online' : 'Offline'}</span>
+      {pending > 0 && (
+        <span style={{ display: 'flex', alignItems: 'center', gap: '3px', marginLeft: 'auto', fontSize: '10px', color: '#EA580C', fontWeight: '700' }}>
+          <RefreshCw size={10} /> {pending}
+        </span>
+      )}
+    </div>
+  )
 }
 
 export default function Layout({ currentPage, onNavigate, children, isAdmin = false }) {
@@ -84,9 +107,12 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
               </text>
             </svg>
           </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <SyncBadge compact />
           <button onClick={() => setMobileMenuOpen(o => !o)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.8)', padding: '4px' }}>
             {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
           </button>
+          </div>
         </div>
 
         {/* Mobile slide-down menu */}
@@ -230,6 +256,9 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
 
         {/* User + sign out */}
         <div style={{ padding: '8px', borderTop: '1px solid rgba(255,255,255,0.06)', position: 'relative', zIndex: 1 }}>
+          {sidebarOpen && (
+            <div style={{ marginBottom: '6px' }}><SyncBadge /></div>
+          )}
           {sidebarOpen && profile && (
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 10px', marginBottom: '6px', background: 'rgba(255,255,255,0.05)', borderRadius: '9px', border: '0.5px solid rgba(255,255,255,0.08)' }}>
               <div style={{ width: '26px', height: '26px', borderRadius: '50%', flexShrink: 0, background: 'rgba(249,115,22,0.2)', border: '1.5px solid rgba(249,115,22,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '800', color: '#FB923C' }}>
