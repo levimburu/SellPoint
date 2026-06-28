@@ -188,3 +188,13 @@ select option { background: white; color: var(--color-text); }
   .modal { padding: 20px; border-radius: 14px; max-height: 95vh; }
   .modal-overlay { padding: 10px; align-items: flex-end; }
 }
+
+/* Responsive dashboard / page grids */
+.responsive-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 20px; }
+.responsive-2col { display: grid; grid-template-columns: 1fr 320px; gap: 16px; }
+@media (max-width: 767px) {
+  .responsive-stats { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .responsive-2col { grid-template-columns: 1fr; }
+  .hide-mobile { display: none !important; }
+  .full-width-mobile { width: 100% !important; }
+}

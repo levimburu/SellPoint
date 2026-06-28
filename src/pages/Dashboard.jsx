@@ -78,14 +78,14 @@ export default function Dashboard({ onNavigate }) {
           <button className="btn-secondary" onClick={() => onNavigate('analysis')}>
             <TrendingUp size={16} /> Sales Analysis
           </button>
-          <button className="btn-primary" onClick={() => onNavigate('checkout')}>
+          <button className="btn-primary hide-mobile" onClick={() => onNavigate('checkout')}>
             <ShoppingCart size={16} /> New Sale
           </button>
         </div>
       </div>
 
       {/* Today stats */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px', marginBottom: '20px' }}>
+      <div className="responsive-stats">
         <StatCard label="Today's Revenue" value={`KES ${stats.todayRevenue.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`} icon={TrendingUp} color="var(--color-primary)" />
         <StatCard label="Today's Profit" value={`KES ${stats.todayProfit.toLocaleString('en-KE', { minimumFractionDigits: 2 })}`} icon={DollarSign} color="#16a34a" sub={`${profitMargin}% margin`} />
         <StatCard label="Orders Today" value={stats.todayOrders} icon={ShoppingCart} color="#0891b2" />
@@ -106,7 +106,7 @@ export default function Dashboard({ onNavigate }) {
         </div>
       )}
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 320px', gap: '16px' }}>
+      <div className="responsive-2col">
         {/* Revenue chart */}
         <div className="card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
