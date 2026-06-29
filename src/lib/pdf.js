@@ -3,23 +3,25 @@ import autoTable from 'jspdf-autotable'
 import { format } from 'date-fns'
 
 const DEFAULT_SETTINGS = {
-  store_name: "Hedge Stores",
+  store_name: 'Hedge Stores',
   tagline: 'For your packaging solutions',
   address: 'Trans-Nzoia, Kitale',
-  phone: '+254 728 885 088',
+  phone: '+254 728885088',
   email: 'info@hedgestores.co.ke',
   kra_pin: 'A000000000Z',
   receipt_footer: 'Thank you for your business!',
   currency: 'KES',
 }
 
-const GREEN = [26, 107, 47]
-const GREEN_LIGHT = [232, 245, 224]
-const DARK = [30, 30, 30]
+const BLACK = [17, 17, 17]
+const CHARCOAL = [84, 84, 88]
+const MINT = [201, 232, 229]
+const MINT_TEXT = [38, 84, 80]
+const DARK = [34, 34, 34]
 const MUTED = [120, 120, 120]
 const WHITE = [255, 255, 255]
-const LIGHT_GRAY = [248, 248, 248]
-const BORDER_GRAY = [220, 220, 220]
+const LIGHT_GRAY = [246, 246, 246]
+const BORDER_GRAY = [214, 214, 214]
 
 // ─── RECEIPT (80mm Thermal) ──────────────────────────────────
 export function generateReceipt(sale, storeSettings = {}) {
@@ -161,154 +163,170 @@ export function generateReceipt(sale, storeSettings = {}) {
   doc.save(`receipt-${receiptNum}.pdf`)
 }
 
-// ─── INVOICE (A4) ─────────────────────────────────────────────
+// ─── INVOICE (A4) — matches the Hedge Stores Canva design ─────
 export function generateInvoice(sale, storeSettings = {}) {
   const s = { ...DEFAULT_SETTINGS, ...storeSettings }
   const doc = new jsPDF({ unit: 'mm', format: 'a4' })
-  const W = doc.internal.pageSize.getWidth()
-  const H = doc.internal.pageSize.getHeight()
+  const W = doc.internal.pageSize.getWidth()   // 210
+  const H = doc.internal.pageSize.getHeight()  // 297
+  const M = 16
   const invoiceNum = sale.invoice_number || `INV-${sale.id?.slice(0, 8).toUpperCase()}`
+  const money = (n) => `${s.currency} ${Number(n || 0).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`
 
-  // ── Header green band ──
-  doc.setFillColor(...GREEN)
-  doc.rect(0, 0, W, 44, 'F')
+  // ── Charcoal header band ──
+  doc.setFillColor(...CHARCOAL)
+  doc.rect(0, 0, W, 56, 'F')
 
-  // Store name left
+  // Banner title
   doc.setTextColor(...WHITE)
-  doc.setFontSize(20)
-  doc.setFont('helvetica', 'bold')
-  doc.text(s.store_name.toUpperCase(), 14, 16)
-  doc.setFontSize(9)
   doc.setFont('helvetica', 'normal')
-  doc.setTextColor(200, 230, 210)
-  doc.text(s.tagline, 14, 23)
+  doc.setFontSize(26)
+  doc.text(`${s.store_name} Invoice`, W / 2, 28, { align: 'center' })
 
-  // Contact right
-  doc.setFontSize(8)
-  doc.setTextColor(...WHITE)
-  doc.text(s.address, W - 14, 10, { align: 'right' })
-  doc.text(s.phone, W - 14, 16, { align: 'right' })
-  doc.text(s.email, W - 14, 22, { align: 'right' })
-  doc.text(`KRA PIN: ${s.kra_pin}`, W - 14, 28, { align: 'right' })
+  // Tagline pill
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(10)
+  const tagW = doc.getTextWidth(s.tagline)
+  const pillW = tagW + 12
+  const pillH = 7.5
+  const pillX = (W - pillW) / 2
+  const pillY = 35
+  doc.setFillColor(...MINT)
+  doc.roundedRect(pillX, pillY, pillW, pillH, 3.7, 3.7, 'F')
+  doc.setTextColor(...MINT_TEXT)
+  doc.text(s.tagline, W / 2, pillY + 5.1, { align: 'center' })
 
-  // INVOICE white label
-  doc.setFillColor(...WHITE)
-  doc.roundedRect(14, 30, 44, 12, 2, 2, 'F')
-  doc.setFontSize(13)
+  // ── INVOICE heading ──
+  let y = 76
+  doc.setTextColor(...BLACK)
   doc.setFont('helvetica', 'bold')
-  doc.setTextColor(...GREEN)
-  doc.text('INVOICE', 36, 38.5, { align: 'center' })
+  doc.setFontSize(30)
+  doc.text('INVOICE', M, y)
 
-  // ── Info boxes ──
-  const boxY = 52
-  const boxes = [
-    { label: 'Invoice No.', value: `#${invoiceNum}` },
-    { label: 'Date', value: format(new Date(sale.created_at || Date.now()), 'dd MMM yyyy') },
-    { label: 'Payment', value: (sale.payment_method || 'CASH').toUpperCase().replace('_', ' ') },
+  // Invoice meta (bold label + value)
+  y += 10
+  const meta = [
+    ['Invoice Number:', `#${invoiceNum}`],
+    ['Date:', format(new Date(sale.created_at || Date.now()), 'dd MMM yyyy')],
+    ['Payment Method:', (sale.payment_method || 'CASH').toUpperCase().replace('_', ' ')],
   ]
-  const boxW = (W - 28) / 3
-  boxes.forEach((box, i) => {
-    const x = 14 + i * (boxW + 2)
-    doc.setFillColor(...LIGHT_GRAY)
-    doc.setDrawColor(...BORDER_GRAY)
-    doc.setLineWidth(0.3)
-    doc.roundedRect(x, boxY, boxW, 14, 2, 2, 'FD')
-    doc.setFontSize(7)
-    doc.setFont('helvetica', 'normal')
-    doc.setTextColor(...MUTED)
-    doc.text(box.label, x + boxW / 2, boxY + 5, { align: 'center' })
-    doc.setFontSize(8)
+  doc.setFontSize(10)
+  meta.forEach(([label, value]) => {
     doc.setFont('helvetica', 'bold')
     doc.setTextColor(...DARK)
-    doc.text(box.value, x + boxW / 2, boxY + 11, { align: 'center' })
+    doc.text(label, M, y)
+    const lw = doc.getTextWidth(label)
+    doc.setFont('helvetica', 'normal')
+    doc.text(` ${value}`, M + lw, y)
+    y += 6.5
   })
 
-  // Customer
-  if (sale.customer_name) {
-    doc.setFontSize(8)
-    doc.setFont('helvetica', 'normal')
+  // ── Store (left) + Billed To (right) ──
+  let leftY = y + 8
+  const rightX = W / 2 + 6
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(10.5)
+  doc.setTextColor(...DARK)
+  doc.text(s.store_name, M, leftY)
+  doc.setFont('helvetica', 'italic')
+  doc.setFontSize(8.5)
+  doc.setTextColor(...MUTED)
+  doc.text(s.tagline, M, leftY + 5)
+  doc.setFont('helvetica', 'normal')
+  doc.setTextColor(...DARK)
+  let lY = leftY + 12
+  doc.text(s.address, M, lY); lY += 4.6
+  doc.text(s.phone, M, lY); lY += 4.6
+  doc.text(s.email, M, lY); lY += 4.6
+  doc.text(`KRA PIN: ${s.kra_pin}`, M, lY)
+
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(10.5)
+  doc.setTextColor(...DARK)
+  doc.text('Billed To:', rightX, leftY)
+  doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9.5)
+  doc.text(sale.customer_name || 'Walk-in Customer', rightX, leftY + 6)
+  if (sale.customer_phone) {
     doc.setTextColor(...MUTED)
-    doc.text('Customer:', 14, boxY + 22)
-    doc.setTextColor(...DARK)
-    doc.setFont('helvetica', 'bold')
-    doc.text(sale.customer_name, 36, boxY + 22)
+    doc.text(String(sale.customer_phone), rightX, leftY + 11)
   }
 
   // ── Items table ──
   const items = sale.items || []
   autoTable(doc, {
-    startY: boxY + (sale.customer_name ? 26 : 20),
-    head: [['ITEM DESCRIPTION', 'QTY', 'PRICE', 'TOTAL']],
+    startY: lY + 10,
+    head: [['Description', 'Qty', 'Unit Price', 'Amount']],
     body: items.map(item => [
       item.product_name || item.name,
-      item.quantity,
-      `KES ${Number(item.unit_price).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`,
-      `KES ${(item.quantity * item.unit_price).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`,
+      String(item.quantity),
+      money(item.unit_price),
+      money(item.quantity * item.unit_price),
     ]),
-    styles: { fontSize: 9, cellPadding: 4, textColor: DARK },
-    headStyles: { fillColor: GREEN, textColor: WHITE, fontStyle: 'bold', fontSize: 8.5, cellPadding: 4 },
-    alternateRowStyles: { fillColor: [250, 252, 250] },
+    theme: 'grid',
+    styles: { fontSize: 9.5, cellPadding: 4, textColor: DARK, lineColor: BORDER_GRAY, lineWidth: 0.1, valign: 'middle' },
+    headStyles: { fillColor: CHARCOAL, textColor: WHITE, fontStyle: 'bold', fontSize: 9.5, cellPadding: 4, lineColor: CHARCOAL, lineWidth: 0.1 },
     columnStyles: {
       0: { cellWidth: 'auto' },
-      1: { cellWidth: 14, halign: 'center' },
+      1: { cellWidth: 20, halign: 'center' },
       2: { cellWidth: 36, halign: 'right' },
-      3: { cellWidth: 38, halign: 'right', fontStyle: 'bold' },
+      3: { cellWidth: 36, halign: 'right', fontStyle: 'bold' },
     },
-    margin: { left: 14, right: 14 },
+    margin: { left: M, right: M },
   })
 
   // ── Totals ──
-  const tY = doc.lastAutoTable.finalY + 4
-  const lX = W - 90
+  let tY = doc.lastAutoTable.finalY + 8
+  const colR = W - M
+  const labelX = W - M - 58
 
-  doc.setDrawColor(...BORDER_GRAY)
-  doc.setLineWidth(0.3)
-  doc.line(lX, tY, W - 14, tY)
-
-  doc.setFontSize(9)
   doc.setFont('helvetica', 'normal')
+  doc.setFontSize(9.5)
   doc.setTextColor(...MUTED)
-  doc.text('Sub Total', lX + 2, tY + 8)
+  doc.text('Subtotal', labelX, tY)
   doc.setTextColor(...DARK)
-  doc.text(`KES ${Number(sale.subtotal || sale.total).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`, W - 14, tY + 8, { align: 'right' })
+  doc.text(money(sale.subtotal || sale.total), colR, tY, { align: 'right' })
 
-  let curY = tY + 8
   if (sale.discount_amount > 0) {
-    curY += 7
+    tY += 6.5
     doc.setTextColor(...MUTED)
-    doc.text('Discount', lX + 2, curY)
-    doc.setTextColor(220, 38, 38)
-    doc.text(`-KES ${Number(sale.discount_amount).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`, W - 14, curY, { align: 'right' })
+    doc.text('Discount', labelX, tY)
+    doc.setTextColor(...DARK)
+    doc.text(`- ${money(sale.discount_amount)}`, colR, tY, { align: 'right' })
   }
 
-  // Grand total green box
-  curY += 7
-  doc.setFillColor(...GREEN)
-  doc.roundedRect(lX, curY, W - 14 - lX, 12, 2, 2, 'F')
-  doc.setFontSize(10)
-  doc.setFont('helvetica', 'bold')
+  tY += 10
+  const barX = labelX - 5
+  doc.setFillColor(...CHARCOAL)
+  doc.rect(barX, tY - 6.5, colR - barX, 11, 'F')
   doc.setTextColor(...WHITE)
-  doc.text('Grand Total', lX + 4, curY + 8.5)
-  doc.text(`KES ${Number(sale.total).toLocaleString('en-KE', { minimumFractionDigits: 2 })}`, W - 16, curY + 8.5, { align: 'right' })
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(10.5)
+  doc.text('Total', barX + 4, tY + 0.8)
+  doc.text(money(sale.total), colR - 4, tY + 0.8, { align: 'right' })
 
   if (sale.mpesa_ref) {
-    doc.setFontSize(8)
     doc.setFont('helvetica', 'normal')
+    doc.setFontSize(8)
     doc.setTextColor(...MUTED)
-    doc.text(`M-Pesa Ref: ${sale.mpesa_ref}`, 14, curY + 8)
+    doc.text(`M-Pesa Ref: ${sale.mpesa_ref}`, M, tY + 0.5)
   }
 
-  // ── Footer green band ──
-  doc.setFillColor(...GREEN)
-  doc.rect(0, H - 16, W, 16, 'F')
-  doc.setTextColor(...WHITE)
-  doc.setFontSize(8.5)
+  // ── Footer ──
+  const fY = H - 30
+  doc.setDrawColor(...BORDER_GRAY)
+  doc.setLineWidth(0.4)
+  doc.line(M, fY, W - M, fY)
   doc.setFont('helvetica', 'bold')
-  doc.text(s.receipt_footer, W / 2, H - 9, { align: 'center' })
-  doc.setFontSize(7.5)
+  doc.setFontSize(10)
+  doc.setTextColor(...BLACK)
+  doc.text(s.receipt_footer, W / 2, fY + 8, { align: 'center' })
   doc.setFont('helvetica', 'normal')
-  doc.setTextColor(200, 230, 210)
-  doc.text(`${s.phone}  |  ${s.email}`, W / 2, H - 4, { align: 'center' })
+  doc.setFontSize(8)
+  doc.setTextColor(...MUTED)
+  doc.text(s.store_name, W / 2, fY + 14, { align: 'center' })
+  doc.text(`${s.address}  ·  ${s.phone}  ·  ${s.email}`, W / 2, fY + 18.5, { align: 'center' })
 
   doc.save(`invoice-${invoiceNum}.pdf`)
 }
