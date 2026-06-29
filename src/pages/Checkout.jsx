@@ -4,6 +4,7 @@ import { useAuth } from '../hooks/useAuth'
 import { localdb, newId, queueChange } from '../lib/localdb'
 import { initiateStkPush, checkStkStatus } from '../lib/mpesa'
 import { generateReceipt, generateInvoice } from '../lib/pdf'
+import { printReceipt, printInvoice } from '../lib/print'
 import { useSettings } from '../hooks/useSettings'
 import { Search, Plus, Minus, Trash2, ShoppingCart, CheckCircle, Loader2, X, User, Phone } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -327,27 +328,69 @@ export default function Checkout() {
 
   if (completedSale) {
     return (
-      <div style={{ maxWidth: '440px', margin: '40px auto', textAlign: 'center', padding: '20px' }}>
-        <div style={{ width: '80px', height: '80px', borderRadius: '50%', background: 'rgba(22,163,74,0.12)', border: '3px solid #16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
-          <CheckCircle size={40} color="#16a34a" />
+      <div style={{ maxWidth: '460px', margin: '32px auto', padding: '20px' }}>
+        {/* Success header */}
+        <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+          <div style={{ width: '72px', height: '72px', borderRadius: '50%', background: 'rgba(22,163,74,0.1)', border: '2.5px solid #16a34a', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <CheckCircle size={36} color="#16a34a" />
+          </div>
+          <h2 style={{ fontSize: '22px', fontWeight: '800', marginBottom: '6px' }}>Sale Complete!</h2>
+          <div style={{ fontSize: '42px', fontWeight: '900', color: 'var(--color-primary)', letterSpacing: '-2px', lineHeight: 1 }}>
+            KES {Number(completedSale.total).toLocaleString('en-KE', { minimumFractionDigits: 2 })}
+          </div>
+          {completedSale.customer_name && (
+            <div style={{ fontSize: '13px', color: 'var(--color-muted)', marginTop: '6px' }}>
+              {completedSale.customer_name} · {(completedSale.payment_method || 'cash').replace('_', ' ').toUpperCase()}
+            </div>
+          )}
         </div>
-        <h2 style={{ fontSize: '26px', fontWeight: '800', marginBottom: '4px' }}>Sale Complete!</h2>
-        <div style={{ fontSize: '48px', fontWeight: '900', color: 'var(--color-primary)', margin: '16px 0 28px', letterSpacing: '-2px' }}>
-          KES {Number(completedSale.total).toLocaleString('en-KE', { minimumFractionDigits: 2 })}
-        </div>
-        <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '16px', marginBottom: '20px', textAlign: 'left' }}>
+
+        {/* Items summary */}
+        <div style={{ background: 'var(--color-surface)', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '14px', marginBottom: '20px' }}>
           {completedSale.items.map(item => (
-            <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '4px 0', borderBottom: '1px solid var(--color-border)' }}>
-              <span>{item.product_name} ×{item.quantity}</span>
-              <span style={{ fontWeight: '600' }}>KES {(item.unit_price * item.quantity).toLocaleString()}</span>
+            <div key={item.id || item.product_id} style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', padding: '5px 0', borderBottom: '1px solid var(--color-border)' }}>
+              <span style={{ color: 'var(--color-text-2)' }}>{item.product_name || item.name} ×{item.quantity}</span>
+              <span style={{ fontWeight: '600' }}>KES {(item.unit_price * item.quantity).toLocaleString('en-KE', { minimumFractionDigits: 2 })}</span>
             </div>
           ))}
+          {completedSale.discount_amount > 0 && (
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', padding: '5px 0', color: 'var(--color-muted)' }}>
+              <span>Discount</span><span>- KES {Number(completedSale.discount_amount).toLocaleString('en-KE', { minimumFractionDigits: 2 })}</span>
+            </div>
+          )}
         </div>
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
-          <button className="btn-secondary" onClick={() => generateReceipt(completedSale, settings)} style={{ flex: 1, justifyContent: 'center' }}>Receipt</button>
-          <button className="btn-secondary" onClick={() => generateInvoice(completedSale, settings)} style={{ flex: 1, justifyContent: 'center' }}>Invoice</button>
+
+        {/* Print buttons */}
+        <div style={{ marginBottom: '10px' }}>
+          <p style={{ fontSize: '12px', color: 'var(--color-muted)', marginBottom: '10px', textAlign: 'center', fontWeight: '500' }}>
+            Does the customer need a receipt?
+          </p>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '10px' }}>
+            <button
+              className="btn-primary"
+              onClick={() => printReceipt(completedSale, settings)}
+              style={{ justifyContent: 'center', gap: '8px', padding: '13px' }}
+            >
+              <Printer size={17} /> Print Receipt
+            </button>
+            <button
+              className="btn-secondary"
+              onClick={() => printInvoice(completedSale, settings)}
+              style={{ justifyContent: 'center', gap: '8px', padding: '13px' }}
+            >
+              <Printer size={17} /> Print Invoice
+            </button>
+          </div>
         </div>
-        <button className="btn-primary" onClick={resetCheckout} style={{ width: '100%', justifyContent: 'center', padding: '14px', fontSize: '16px', fontWeight: '700' }}>New Sale</button>
+
+        {/* Done / New Sale */}
+        <button
+          className="btn-secondary"
+          onClick={resetCheckout}
+          style={{ width: '100%', justifyContent: 'center', padding: '13px', fontSize: '15px', fontWeight: '700' }}
+        >
+          No Receipt — New Sale
+        </button>
       </div>
     )
   }
