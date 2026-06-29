@@ -6,7 +6,7 @@ import { initiateStkPush, checkStkStatus } from '../lib/mpesa'
 import { generateReceipt, generateInvoice } from '../lib/pdf'
 import { printReceipt, printInvoice } from '../lib/print'
 import { useSettings } from '../hooks/useSettings'
-import { Search, Plus, Minus, Trash2, ShoppingCart, CheckCircle, Loader2, X, User, Phone } from 'lucide-react'
+import { Search, Plus, Minus, Trash2, ShoppingCart, CheckCircle, Loader2, X, User, Phone, Printer } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const PAYMENT_METHODS = [
