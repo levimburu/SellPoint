@@ -82,6 +82,13 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }
 
+  // Admin permanently deletes a staff account (login + profile).
+  // Past sales are preserved — the cashier name is stored on each sale.
+  async function deleteStaffAccount(userId) {
+    const { error } = await supabase.rpc('delete_staff_account', { p_user_id: userId })
+    if (error) throw error
+  }
+
   async function signOut() {
     await supabase.auth.signOut()
   }
@@ -90,7 +97,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       user, profile, loading,
       signIn, signOut,
-      createStaffAccount, updateStaffProfile, setStaffStatus,
+      createStaffAccount, updateStaffProfile, setStaffStatus, deleteStaffAccount,
     }}>
       {children}
     </AuthContext.Provider>

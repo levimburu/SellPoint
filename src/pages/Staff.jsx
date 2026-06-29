@@ -1,14 +1,14 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
-import { Plus, Edit2, X, Loader2, Users, Eye, EyeOff, Shield, UserX, UserCheck } from 'lucide-react'
+import { Plus, Edit2, X, Loader2, Users, Eye, EyeOff, Shield, UserX, UserCheck, Trash2 } from 'lucide-react'
 import toast from 'react-hot-toast'
 import { format } from 'date-fns'
 
 const emptyForm = { fullName: '', username: '', password: '', role: 'cashier' }
 
 export default function Staff() {
-  const { profile, createStaffAccount, setStaffStatus } = useAuth()
+  const { profile, createStaffAccount, setStaffStatus, deleteStaffAccount } = useAuth()
   const [staff, setStaff] = useState([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -16,6 +16,7 @@ export default function Staff() {
   const [saving, setSaving] = useState(false)
   const [showPassword, setShowPassword] = useState(false)
   const [togglingId, setTogglingId] = useState(null)
+  const [deletingId, setDeletingId] = useState(null)
 
   useEffect(() => { loadStaff() }, [])
 
@@ -73,6 +74,25 @@ export default function Staff() {
       toast.error(err.message)
     } finally {
       setTogglingId(null)
+    }
+  }
+
+  async function handleDelete(member) {
+    const ok = confirm(
+      `Permanently delete ${member.full_name}'s account?\n\n` +
+      `They will no longer be able to log in. Their past sales stay in the records. ` +
+      `You can re-add the same username afterwards.\n\nThis cannot be undone.`
+    )
+    if (!ok) return
+    setDeletingId(member.id)
+    try {
+      await deleteStaffAccount(member.id)
+      toast.success(`${member.full_name}'s account deleted`)
+      loadStaff()
+    } catch (err) {
+      toast.error(err.message || 'Failed to delete account')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -152,22 +172,38 @@ export default function Staff() {
                   </td>
                   <td>
                     {member.id !== profile?.id && (
-                      <button
-                        onClick={() => handleToggleStatus(member)}
-                        disabled={togglingId === member.id}
-                        style={{
-                          background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
-                          color: member.status === 'suspended' ? 'var(--color-success)' : 'var(--color-danger)',
-                        }}
-                        title={member.status === 'suspended' ? 'Activate account' : 'Suspend account'}
-                      >
-                        {togglingId === member.id
-                          ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} />
-                          : member.status === 'suspended'
-                            ? <UserCheck size={15} />
-                            : <UserX size={15} />
-                        }
-                      </button>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <button
+                          onClick={() => handleToggleStatus(member)}
+                          disabled={togglingId === member.id || deletingId === member.id}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                            color: member.status === 'suspended' ? 'var(--color-success)' : 'var(--color-warning)',
+                          }}
+                          title={member.status === 'suspended' ? 'Activate account' : 'Suspend account'}
+                        >
+                          {togglingId === member.id
+                            ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} />
+                            : member.status === 'suspended'
+                              ? <UserCheck size={15} />
+                              : <UserX size={15} />
+                          }
+                        </button>
+                        <button
+                          onClick={() => handleDelete(member)}
+                          disabled={deletingId === member.id || togglingId === member.id}
+                          style={{
+                            background: 'none', border: 'none', cursor: 'pointer', padding: '4px',
+                            color: 'var(--color-danger)',
+                          }}
+                          title="Delete account permanently"
+                        >
+                          {deletingId === member.id
+                            ? <Loader2 size={15} style={{ animation: 'spin 1s linear infinite' }} />
+                            : <Trash2 size={15} />
+                          }
+                        </button>
+                      </div>
                     )}
                   </td>
                 </tr>
