@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { supabase } from '../lib/supabase'
 import { useAuth } from '../hooks/useAuth'
+import { localdb, newId, queueChange } from '../lib/localdb'
 import { initiateStkPush, checkStkStatus } from '../lib/mpesa'
 import { generateReceipt, generateInvoice } from '../lib/pdf'
 import { useSettings } from '../hooks/useSettings'
@@ -58,14 +59,33 @@ export default function Checkout() {
   }, [])
 
   async function loadProducts() {
-    const { data } = await supabase.from('products').select('*').eq('is_active', true).gt('stock_qty', 0).order('name')
-    setProducts(data || [])
-    setFiltered(data || [])
+    // Local-first so the product grid works offline
+    const local = (await localdb.products.toArray().catch(() => []))
+      .filter(p => p.is_active !== false && (p.stock_qty || 0) > 0)
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    if (local.length) { setProducts(local); setFiltered(local) }
+
+    if (navigator.onLine) {
+      const { data } = await supabase.from('products').select('*').eq('is_active', true).gt('stock_qty', 0).order('name')
+      if (data) {
+        setProducts(data); setFiltered(data)
+        try { await localdb.products.bulkPut(data) } catch {}
+      }
+    }
   }
 
   async function loadCustomers() {
-    const { data } = await supabase.from('customers').select('id, name, phone, email').order('name')
-    setCustomers(data || [])
+    const local = (await localdb.customers.toArray().catch(() => []))
+      .sort((a, b) => (a.name || '').localeCompare(b.name || ''))
+    if (local.length) setCustomers(local.map(c => ({ id: c.id, name: c.name, phone: c.phone, email: c.email })))
+
+    if (navigator.onLine) {
+      const { data } = await supabase.from('customers').select('id, name, phone, email').order('name')
+      if (data) {
+        setCustomers(data)
+        try { await localdb.customers.bulkPut(data) } catch {}
+      }
+    }
   }
 
   const categories = ['All', ...new Set(products.map(p => p.category).filter(Boolean))]
@@ -137,6 +157,10 @@ export default function Checkout() {
     if (cart.length === 0) { toast.error('Cart is empty'); return }
     if (paymentMethod === 'M-Pesa' && !mpesaPhone) { toast.error('Enter M-Pesa phone number'); return }
     if (paymentMethod === 'Credit' && !selectedCustomer) { toast.error('Select a customer for credit tab'); return }
+    if (!navigator.onLine && (paymentMethod === 'M-Pesa' || paymentMethod === 'Credit')) {
+      toast.error('M-Pesa and credit tabs need internet. Use Cash while offline.')
+      return
+    }
     setProcessing(true)
     try {
       if (paymentMethod === 'Credit') {
@@ -216,6 +240,52 @@ export default function Checkout() {
   async function recordSale(mpesaRef) {
     setProcessing(true)
     const receiptNumber = `HSR-${Date.now().toString(36).toUpperCase()}`
+    const invoiceNumber = `INV-${receiptNumber.replace('HSR-', '')}`
+
+    // ---- OFFLINE PATH: save locally + queue for sync ----
+    if (!navigator.onLine) {
+      const saleId = newId()
+      const saleRow = {
+        id: saleId,
+        customer_id: selectedCustomer?.id || null,
+        cashier_id: user?.id, cashier_name: profile?.full_name || 'Cashier',
+        subtotal, discount_amount: discountAmount, total,
+        payment_method: paymentMethod.toLowerCase().replace(' ', '_'),
+        mpesa_ref: mpesaRef || null, receipt_number: receiptNumber,
+        status: 'completed', created_at: new Date().toISOString(),
+      }
+      const itemRows = cart.map(i => ({
+        id: newId(), sale_id: saleId, product_id: i.id, product_name: i.name,
+        quantity: i.quantity, unit_price: i.unit_price, total_price: i.unit_price * i.quantity,
+      }))
+      try {
+        await localdb.sales.add(saleRow)
+        await localdb.sale_items.bulkAdd(itemRows)
+        for (const i of cart) {
+          const p = await localdb.products.get(i.id)
+          if (p) { p.stock_qty = (p.stock_qty || 0) - i.quantity; await localdb.products.put(p) }
+        }
+        await queueChange('sale_bundle', 'insert', {
+          id: saleId, sale: saleRow, items: itemRows,
+          invoice: { sale_id: saleId, invoice_number: invoiceNumber },
+        })
+      } catch (e) {
+        toast.error('Could not save sale locally'); setProcessing(false); return
+      }
+      setCompletedSale({
+        ...saleRow,
+        items: cart.map(i => ({ ...i, product_name: i.name })),
+        customer_name: selectedCustomer?.name || null,
+        customer_phone: selectedCustomer?.phone || null,
+        invoice_number: invoiceNumber,
+      })
+      loadProducts()
+      toast.success('Sale saved offline — will sync when online')
+      setProcessing(false)
+      return
+    }
+
+    // ---- ONLINE PATH (unchanged) ----
     const { data: saleData, error: saleError } = await supabase
       .from('sales').insert({
         customer_id: selectedCustomer?.id || null,
@@ -232,7 +302,6 @@ export default function Checkout() {
     for (const item of cart) {
       await supabase.rpc('decrement_stock', { product_id: item.id, qty: item.quantity })
     }
-    const invoiceNumber = `INV-${receiptNumber.replace('HSR-', '')}`
     await supabase.from('invoices').insert({ sale_id: saleData.id, invoice_number: invoiceNumber })
     setCompletedSale({
       ...saleData,
