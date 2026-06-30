@@ -44,6 +44,19 @@ function createWindow() {
     return { action: 'deny' }
   })
 
+  // Fullscreen toggle: F11 fills the whole screen and hides the Windows
+  // taskbar (clean kiosk view for the shop). F11 again or Esc exits.
+  mainWindow.webContents.on('before-input-event', (event, input) => {
+    if (input.type !== 'keyDown') return
+    if (input.key === 'F11') {
+      event.preventDefault()
+      mainWindow.setFullScreen(!mainWindow.isFullScreen())
+    } else if (input.key === 'Escape' && mainWindow.isFullScreen()) {
+      event.preventDefault()
+      mainWindow.setFullScreen(false)
+    }
+  })
+
   mainWindow.on('closed', () => {
     mainWindow = null
   })
