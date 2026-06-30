@@ -8,6 +8,9 @@ import tailwindcss from '@tailwindcss/vite'
 // Disabling minify removes lightningcss from the build path.
 // Gzipped CSS size impact is negligible (~0.2 kB).
 export default defineConfig({
+  // Relative base so built asset paths work both on the web (Vercel)
+  // and inside the packaged Electron desktop app (loaded from a local file).
+  base: './',
   plugins: [
     react(),
     tailwindcss(),
