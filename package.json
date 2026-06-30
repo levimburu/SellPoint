@@ -2,7 +2,7 @@
   "name": "sellpoint-pos",
   "private": true,
   "version": "1.0.0",
-  "description": "SellPoint — Point of Sale system",
+  "description": "SellPoint \u2014 Point of Sale system",
   "author": "Levi Mburu",
   "type": "module",
   "main": "electron/main.cjs",
@@ -68,15 +68,26 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "signAndEditExecutable": false
     },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "shortcutName": "SellPoint"
-    }
+      "shortcutName": "SellPoint",
+      "installerIcon": "build/icon.ico",
+      "uninstallerIcon": "build/icon.ico",
+      "installerHeaderIcon": "build/icon.ico",
+      "include": "build/installer.nsh"
+    },
+    "extraResources": [
+      {
+        "from": "build/icon.ico",
+        "to": "icon.ico"
+      }
+    ]
   },
   "overrides": {
     "lightningcss": "1.32.0"
