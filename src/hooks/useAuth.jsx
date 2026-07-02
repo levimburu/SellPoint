@@ -1,5 +1,6 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { localdb } from '../lib/localdb'
 
 const AuthContext = createContext(null)
 
@@ -25,17 +26,37 @@ export function AuthProvider({ children }) {
   }, [])
 
   async function fetchProfile(userId) {
-    const { data } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .single()
-    setProfile(data)
+    // If online, load the fresh profile and cache it locally for offline use.
+    if (navigator.onLine) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', userId)
+          .single()
+        if (!error && data) {
+          setProfile(data)
+          setLoading(false)
+          try { await localdb.profiles.put(data) } catch { /* cache best-effort */ }
+          return
+        }
+      } catch { /* fall through to cache */ }
+    }
+
+    // Offline (or the fetch failed): use the locally cached profile so the
+    // user stays signed in and can keep working without internet.
+    let cached = null
+    try { cached = await localdb.profiles.get(userId) } catch { /* no cache */ }
+    setProfile(cached || null)
     setLoading(false)
   }
 
   // Sign in with username — converts to internal email behind the scenes
   async function signIn(username, password) {
+    if (!navigator.onLine) {
+      throw new Error('You need internet to log in the first time. Once signed in online, the app works offline.')
+    }
+
     const email = username.toLowerCase().includes('@')
       ? username  // allow email login for existing admin accounts
       : `${username.toLowerCase()}@sellpoint.internal`
