@@ -198,3 +198,58 @@ select option { background: white; color: var(--color-text); }
   .hide-mobile { display: none !important; }
   .full-width-mobile { width: 100% !important; }
 }
+/* ── Mobile: render data tables as readable cards ──────────────
+   On phones, multi-column tables get crushed. This turns each row
+   into a card and shows the column name (via data-label) beside
+   each value. Applies to every .table automatically. */
+@media (max-width: 767px) {
+  .table-container { overflow: visible; border: none; box-shadow: none; background: transparent; border-radius: 0; }
+  .table { border-collapse: separate; border-spacing: 0; }
+  .table thead { display: none; }
+  .table tbody, .table tr, .table td { display: block; width: 100%; }
+
+  .table tr {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 4px 14px;
+    margin-bottom: 10px;
+    box-shadow: var(--shadow-sm);
+  }
+  .table tbody tr:hover td { background: transparent; }
+
+  .table td {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 14px;
+    padding: 9px 0 !important;
+    border: none !important;
+    border-bottom: 1px solid var(--color-border) !important;
+    text-align: right;
+    min-height: 20px;
+  }
+  .table td:last-child { border-bottom: none !important; }
+
+  .table td::before {
+    content: attr(data-label);
+    font-weight: 600;
+    color: var(--color-muted);
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    text-align: left;
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+  /* Cells with an empty label (e.g. action buttons) go full width, left-aligned */
+  .table td[data-label=""] { justify-content: flex-start; text-align: left; }
+  .table td[data-label=""]::before { content: none; }
+}
+
+@media (max-width: 767px) {
+  /* Tables not yet given data-labels: show values as a clean left-aligned
+     stack instead of an odd right-shifted column. */
+  .table td:not([data-label]) { justify-content: flex-start; text-align: left; }
+  .table td:not([data-label])::before { content: none; }
+}

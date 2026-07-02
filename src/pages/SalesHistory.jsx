@@ -103,18 +103,18 @@ export default function SalesHistory() {
             <tbody>
               {filtered.map(sale => (
                 <tr key={sale.id}>
-                  <td style={{ fontWeight: '600', fontSize: '13px', fontFamily: 'monospace' }}>{sale.receipt_number}</td>
-                  <td style={{ fontSize: '13px', color: 'var(--color-muted)' }}>{format(new Date(sale.created_at), 'dd MMM yyyy, HH:mm')}</td>
-                  <td style={{ fontSize: '13px' }}>{sale.customers?.name || 'Walk-in'}</td>
-                  <td>
+                  <td data-label="Receipt" style={{ fontWeight: '600', fontSize: '13px', fontFamily: 'monospace' }}>{sale.receipt_number}</td>
+                  <td data-label="Date" style={{ fontSize: '13px', color: 'var(--color-muted)' }}>{format(new Date(sale.created_at), 'dd MMM yyyy, HH:mm')}</td>
+                  <td data-label="Customer" style={{ fontSize: '13px' }}>{sale.customers?.name || 'Walk-in'}</td>
+                  <td data-label="Payment">
                     <span className={sale.payment_method === 'cash' ? 'badge-green' : sale.payment_method?.includes('mpesa') ? 'badge-yellow' : 'badge-green'}>
                       {sale.payment_method?.replace('_', ' ').toUpperCase()}
                     </span>
                   </td>
-                  <td style={{ fontSize: '12px', color: 'var(--color-muted)', fontFamily: 'monospace' }}>{sale.mpesa_ref || '—'}</td>
-                  <td style={{ fontWeight: '700', color: 'var(--color-primary)' }}>KES {Number(sale.total).toLocaleString()}</td>
-                  <td><span className="badge-green">Completed</span></td>
-                  <td>
+                  <td data-label="M-Pesa Ref" style={{ fontSize: '12px', color: 'var(--color-muted)', fontFamily: 'monospace' }}>{sale.mpesa_ref || '—'}</td>
+                  <td data-label="Total" style={{ fontWeight: '700', color: 'var(--color-primary)' }}>KES {Number(sale.total).toLocaleString()}</td>
+                  <td data-label="Status"><span className="badge-green">Completed</span></td>
+                  <td data-label="">
                     <div style={{ display: 'flex', gap: '8px' }}>
                       <button onClick={() => openSale(sale)} title="View" style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)', padding: '4px' }}>
                         <Eye size={15} />
