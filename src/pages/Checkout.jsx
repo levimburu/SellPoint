@@ -573,10 +573,25 @@ export default function Checkout() {
                       style={{ width: '22px', height: '22px', borderRadius: '5px', background: '#F1F5F9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: item.quantity === 1 ? 'var(--color-danger)' : 'var(--color-text)' }}>
                       {item.quantity === 1 ? <Trash2 size={9} /> : <Minus size={9} />}
                     </button>
-                    <button onClick={() => openNumpad(item.id, item.quantity)}
-                      style={{ width: '24px', height: '22px', borderRadius: '5px', background: '#FFF7ED', border: '1px solid #FED7AA', cursor: 'pointer', color: 'var(--color-primary)', fontSize: '11px', fontWeight: '700' }}>
-                      {item.quantity}
-                    </button>
+                    <input
+                      type="number"
+                      min="1"
+                      value={item.quantity}
+                      onChange={e => {
+                        const val = parseInt(e.target.value) || 1
+                        const product = products.find(p => p.id === item.id)
+                        if (product && val > product.stock_qty) { toast.error('Insufficient stock'); return }
+                        if (val < 1) return
+                        setCart(prev => prev.map(i => i.id === item.id ? { ...i, quantity: val } : i))
+                      }}
+                      onFocus={e => e.target.select()}
+                      style={{
+                        width: '44px', height: '22px', borderRadius: '5px',
+                        background: '#FFF7ED', border: '1px solid #FED7AA',
+                        color: 'var(--color-primary)', fontSize: '11px', fontWeight: '700',
+                        textAlign: 'center', padding: '0', outline: 'none',
+                      }}
+                    />
                     <button onClick={() => updateQty(item.id, 1)}
                       style={{ width: '22px', height: '22px', borderRadius: '5px', background: '#F1F5F9', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--color-text)' }}>
                       <Plus size={9} />
