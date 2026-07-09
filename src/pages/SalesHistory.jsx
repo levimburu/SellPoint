@@ -2,11 +2,22 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { generateReceipt, generateInvoice } from '../lib/pdf'
 import { useSettings } from '../hooks/useSettings'
-import { Search, FileText, Loader2, Eye, X } from 'lucide-react'
+import { Search, FileText, Loader2, Eye, X, ChevronRight } from 'lucide-react'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768)
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
+  return isMobile
+}
+
 export default function SalesHistory() {
+  const isMobile = useIsMobile()
   const { settings } = useSettings()
   const [sales, setSales] = useState([])
   const [loading, setLoading] = useState(true)
@@ -85,7 +96,34 @@ export default function SalesHistory() {
           <FileText size={40} style={{ marginBottom: '12px', opacity: 0.4 }} />
           <p>No sales found</p>
         </div>
+      ) : isMobile ? (
+        /* ── Mobile: compact tap-to-expand list ── */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {filtered.map(sale => (
+            <button key={sale.id} onClick={() => openSale(sale)} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+              borderRadius: '12px', padding: '13px 14px', cursor: 'pointer', textAlign: 'left', width: '100%',
+            }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--color-text)', marginBottom: '3px' }}>
+                  {sale.customers?.name || 'Walk-in'}
+                </div>
+                <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                  {format(new Date(sale.created_at), 'dd MMM, HH:mm')} · {sale.payment_method?.replace('_', ' ').toUpperCase()}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                <span style={{ fontWeight: '700', fontSize: '15px', color: 'var(--color-primary)' }}>
+                  KES {Number(sale.total).toLocaleString()}
+                </span>
+                <ChevronRight size={16} color="var(--color-muted)" />
+              </div>
+            </button>
+          ))}
+        </div>
       ) : (
+        /* ── Desktop: full table ── */
         <div className="table-container">
           <table className="table">
             <thead>

@@ -1,14 +1,26 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { localdb } from '../lib/localdb'
-import { Plus, Search, Edit2, Trash2, X, Loader2, Package } from 'lucide-react'
+import { Plus, Search, Edit2, Trash2, X, Loader2, Package, ChevronRight } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const CATEGORIES = ['General', 'Electronics', 'Clothing', 'Food & Beverages', 'Stationery', 'Household', 'Cosmetics', 'Pharmacy', 'Other']
 
 const emptyForm = { name: '', sku: '', category: 'General', price: '', cost_price: '', stock_qty: '', low_stock_alert: 5, unit: 'pcs', description: '', supplier_id: '' }
 
+function useIsMobile() {
+  const [isMobile, setIsMobile] = useState(typeof window !== 'undefined' && window.innerWidth < 768)
+  useEffect(() => {
+    const h = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', h)
+    return () => window.removeEventListener('resize', h)
+  }, [])
+  return isMobile
+}
+
 export default function Inventory({ readOnly = false }) {
+  const isMobile = useIsMobile()
+  const [viewProduct, setViewProduct] = useState(null)
   const [products, setProducts] = useState([])
   const [filtered, setFiltered] = useState([])
   const [search, setSearch] = useState('')
@@ -168,7 +180,38 @@ export default function Inventory({ readOnly = false }) {
           <Package size={40} style={{ marginBottom: '12px', opacity: 0.4 }} />
           <p>{search ? 'No products match your search' : 'No products yet. Add your first product.'}</p>
         </div>
+      ) : isMobile ? (
+        /* ── Mobile: product name only, tap to see details ── */
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          {filtered.map(product => {
+            const isLow = product.stock_qty <= (product.low_stock_alert || 5)
+            const isOut = product.stock_qty === 0
+            return (
+              <button key={product.id} onClick={() => setViewProduct(product)} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                background: 'var(--color-surface)', border: '1px solid var(--color-border)',
+                borderRadius: '12px', padding: '13px 14px', cursor: 'pointer', textAlign: 'left', width: '100%',
+              }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontWeight: '600', fontSize: '14px', color: 'var(--color-text)', marginBottom: '3px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {product.name}
+                  </div>
+                  <div style={{ fontSize: '12px', color: 'var(--color-muted)' }}>
+                    {product.stock_qty} {product.unit} · {product.category}
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
+                  {isOut ? <span className="badge-red">Out</span>
+                    : isLow ? <span className="badge-yellow">Low</span>
+                      : <span style={{ fontWeight: '700', fontSize: '14px', color: 'var(--color-primary)' }}>KES {Number(product.price).toLocaleString()}</span>}
+                  <ChevronRight size={16} color="var(--color-muted)" />
+                </div>
+              </button>
+            )
+          })}
+        </div>
       ) : (
+        /* ── Desktop: full table ── */
         <div className="table-container">
           <table className="table">
             <thead>
@@ -222,6 +265,59 @@ export default function Inventory({ readOnly = false }) {
           </table>
         </div>
       )}
+
+      {/* Mobile product detail modal */}
+      {viewProduct && (() => {
+        const p = viewProduct
+        const isLow = p.stock_qty <= (p.low_stock_alert || 5)
+        const isOut = p.stock_qty === 0
+        return (
+          <div className="modal-overlay" onClick={e => e.target === e.currentTarget && setViewProduct(null)}>
+            <div className="modal" style={{ maxWidth: '480px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '18px' }}>
+                <div>
+                  <h2 style={{ fontSize: '17px', fontWeight: '700', color: 'var(--color-text)' }}>{p.name}</h2>
+                  {p.description && <p style={{ fontSize: '13px', color: 'var(--color-muted)', marginTop: '4px' }}>{p.description}</p>}
+                </div>
+                <button onClick={() => setViewProduct(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--color-muted)', padding: '4px', flexShrink: 0 }}>
+                  <X size={20} />
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+                {[
+                  ['Category', p.category],
+                  ['SKU', p.sku || '—'],
+                  ['Selling Price', `KES ${Number(p.price).toLocaleString()}`],
+                  ['Cost Price', p.cost_price ? `KES ${Number(p.cost_price).toLocaleString()}` : '—'],
+                  ['Stock', `${p.stock_qty} ${p.unit}`],
+                  ['Low Stock Alert', `${p.low_stock_alert || 5} ${p.unit}`],
+                ].map(([label, value]) => (
+                  <div key={label} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0', borderBottom: '1px solid var(--color-border)' }}>
+                    <span style={{ fontSize: '13px', color: 'var(--color-muted)', fontWeight: '500' }}>{label}</span>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--color-text)' }}>{value}</span>
+                  </div>
+                ))}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '11px 0' }}>
+                  <span style={{ fontSize: '13px', color: 'var(--color-muted)', fontWeight: '500' }}>Status</span>
+                  {isOut ? <span className="badge-red">Out of Stock</span>
+                    : isLow ? <span className="badge-yellow">Low Stock</span>
+                      : <span className="badge-green">In Stock</span>}
+                </div>
+              </div>
+              {!readOnly && (
+                <div style={{ display: 'flex', gap: '10px', marginTop: '18px' }}>
+                  <button className="btn-primary" onClick={() => { setViewProduct(null); openEdit(p) }} style={{ flex: 1, justifyContent: 'center' }}>
+                    Edit Product
+                  </button>
+                  <button className="btn-danger" onClick={() => { setViewProduct(null); handleDelete(p) }} style={{ flex: 1, justifyContent: 'center' }}>
+                    Delete
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })()}
 
       {/* Modal */}
       {showModal && (
