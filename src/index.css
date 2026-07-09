@@ -186,7 +186,7 @@ select option { background: white; color: var(--color-text); }
   .stat-card { padding: 14px 16px; }
   .stat-value { font-size: 22px; }
   .modal { padding: 20px; border-radius: 14px; max-height: 95vh; }
-  .modal-overlay { padding: 10px; align-items: flex-end; }
+  .modal-overlay { padding: 10px; align-items: center; }
 }
 
 /* Responsive dashboard / page grids */
