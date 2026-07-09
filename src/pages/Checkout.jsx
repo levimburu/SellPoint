@@ -11,9 +11,6 @@ import toast from 'react-hot-toast'
 const PAYMENT_METHODS = [
   { id: 'Cash', label: 'Cash', color: '#16a34a' },
   { id: 'M-Pesa', label: 'M-Pesa', color: '#15803d' },
-  { id: 'Card', label: 'Card', color: '#1d4ed8' },
-  { id: 'Bank Transfer', label: 'Bank', color: '#7c3aed' },
-  { id: 'Credit', label: 'Credit Tab', color: '#dc2626' },
 ]
 
 export default function Checkout() {
