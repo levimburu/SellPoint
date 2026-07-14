@@ -95,7 +95,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
   // ── MOBILE LAYOUT ──────────────────────────────────────────
   if (isMobile) {
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', background: 'var(--color-bg)', overflow: 'hidden' }}>
+      <div className="mobile-shell" style={{ display: 'flex', flexDirection: 'column', background: 'var(--color-bg)', overflow: 'hidden' }}>
 
         {/* Mobile top bar */}
         <div style={{ background: 'var(--color-sidebar)', padding: '12px 16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0, zIndex: 20 }}>
@@ -160,7 +160,7 @@ export default function Layout({ currentPage, onNavigate, children, isAdmin = fa
         </main>
 
         {/* Mobile bottom nav (most used pages) */}
-        <div style={{ background: 'var(--color-sidebar)', borderTop: '1px solid rgba(255,255,255,0.08)', padding: '6px 0 8px', display: 'flex', justifyContent: 'space-around', flexShrink: 0, zIndex: 20 }}>
+        <div style={{ background: 'var(--color-sidebar)', borderTop: '1px solid rgba(255,255,255,0.08)', padding: '6px 0 calc(8px + env(safe-area-inset-bottom))', display: 'flex', justifyContent: 'space-around', flexShrink: 0, zIndex: 20 }}>
           {[
             { id: 'dashboard', label: 'Home', icon: LayoutDashboard },
             { id: 'sales', label: 'Sales', icon: FileText },

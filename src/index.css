@@ -253,3 +253,8 @@ select option { background: white; color: var(--color-text); }
   .table td:not([data-label]) { justify-content: flex-start; text-align: left; }
   .table td:not([data-label])::before { content: none; }
 }
+
+/* Mobile app shell: use dynamic viewport height so the bottom nav
+   isn't hidden behind Safari's toolbar on iPhone. Falls back to
+   100vh on older browsers that don't support dvh. */
+.mobile-shell { height: 100vh; height: 100dvh; }
