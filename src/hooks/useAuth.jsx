@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, authAdmin } from '../lib/supabase'
 import { localdb } from '../lib/localdb'
 
 const AuthContext = createContext(null)
@@ -29,6 +29,9 @@ export function AuthProvider({ children }) {
     // If online, load the fresh profile and cache it locally for offline use.
     if (navigator.onLine) {
       try {
+        // Creates the very first admin profile; for everyone else it just returns
+        // their existing profile (or errors if an admin hasn't added them).
+        await supabase.rpc('ensure_profile')
         const { data, error } = await supabase
           .from('profiles')
           .select('*')
@@ -64,7 +67,7 @@ export function AuthProvider({ children }) {
     const { data, error } = await supabase.auth.signInWithPassword({ email, password })
     if (error) {
       // Give a friendly message instead of Supabase's technical one
-      if (error.message.includes('Invalid login')) {
+      if (/invalid|incorrect|credentials/i.test(error.message || '')) {
         throw new Error('Incorrect username or password')
       }
       throw error
@@ -72,17 +75,22 @@ export function AuthProvider({ children }) {
     return data
   }
 
-  // Admin creates a new staff account
+  // Admin creates a new staff account (login in Neon Auth + profile row)
   async function createStaffAccount({ username, password, fullName, role }) {
-    const { data, error } = await supabase.rpc('create_staff_account', {
-      p_username: username.toLowerCase(),
-      p_password: password,
-      p_full_name: fullName,
-      p_role: role,
-      p_created_by: user?.id,
+    const uname = username.toLowerCase().trim()
+    const { data, error } = await authAdmin().createUser({
+      email: `${uname}@sellpoint.internal`,
+      password,
+      name: fullName,
+      role: role === 'admin' ? 'admin' : 'user',
     })
-    if (error) throw error
-    return data
+    if (error) throw new Error(error.message || 'Could not create account')
+    const newId = data?.user?.id
+    const { data: profile, error: pErr } = await supabase.rpc('admin_create_profile', {
+      p_user_id: newId, p_username: uname, p_full_name: fullName, p_role: role,
+    })
+    if (pErr) throw pErr
+    return profile
   }
 
   // Admin updates a staff member's profile
@@ -101,13 +109,19 @@ export function AuthProvider({ children }) {
       .update({ status })
       .eq('id', userId)
     if (error) throw error
+    try {
+      if (status === 'suspended') await authAdmin().banUser({ userId, banReason: 'Suspended by admin' })
+      else await authAdmin().unbanUser({ userId })
+    } catch { /* profile status already blocks access */ }
   }
 
   // Admin permanently deletes a staff account (login + profile).
   // Past sales are preserved — the cashier name is stored on each sale.
   async function deleteStaffAccount(userId) {
-    const { error } = await supabase.rpc('delete_staff_account', { p_user_id: userId })
+    const { error } = await supabase.rpc('admin_delete_profile', { p_user_id: userId })
     if (error) throw error
+    // Block the login too (the auth record is kept so past data stays consistent).
+    try { await authAdmin().banUser({ userId, banReason: 'Account deleted' }) } catch { /* profile gone = no access */ }
   }
 
   async function signOut() {

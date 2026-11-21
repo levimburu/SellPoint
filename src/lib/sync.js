@@ -1,7 +1,7 @@
 // ============================================================
 // SellPoint — Sync engine (Phase 2: pull/mirror)
 //
-// Copies Supabase tables down into the local IndexedDB store so
+// Copies Neon tables down into the local IndexedDB store so
 // pages can read data even with no internet. Phase 3/4 will add
 // pushing local changes back up.
 // ============================================================
@@ -57,7 +57,7 @@ export async function readLocal(table) {
 }
 
 // ============================================================
-// Phase 3/4 — push queued offline changes up to Supabase
+// Phase 3/4 — push queued offline changes up to Neon
 // ============================================================
 
 // Postgres unique-violation = the row is already on the server.

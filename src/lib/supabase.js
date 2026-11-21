@@ -1,10 +1,23 @@
-import { createClient } from '@supabase/supabase-js'
+// ============================================================
+// SellPoint — database + auth client (Neon)
+//
+// Kept under the old name `supabase` so every page keeps working
+// unchanged. Under the hood this is @neon/neon-js: Neon Auth for
+// login and the Neon Data API (PostgREST) for queries, with a
+// Supabase-compatible interface.
+// ============================================================
+import { createClient } from '@neon/neon-js/supabase'
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY
+const neonUrl = import.meta.env.VITE_NEON_URL
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables. Check your .env file.')
+if (!neonUrl) {
+  console.error('Missing VITE_NEON_URL. Check your .env file.')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(neonUrl)
+
+// Admin-only auth operations (create/ban/set-password for staff).
+// Uses the signed-in admin's session.
+export function authAdmin() {
+  return supabase.auth.getBetterAuthInstance().admin
+}

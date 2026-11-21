@@ -2,7 +2,7 @@
   "name": "sellpoint-pos",
   "private": true,
   "version": "1.0.0",
-  "description": "SellPoint \u2014 Point of Sale system",
+  "description": "SellPoint — Point of Sale system",
   "author": "Levi Mburu",
   "type": "module",
   "main": "electron/main.cjs",
@@ -16,7 +16,7 @@
     "electron:build:win": "npm run build && electron-builder --win"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.108.2",
+    "@neon/neon-js": "^0.10.2",
     "@tanstack/react-router": "^1.170.15",
     "@tanstack/react-router-devtools": "^1.167.0",
     "@tanstack/router-devtools": "^1.167.0",
